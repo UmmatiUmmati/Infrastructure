@@ -63,13 +63,13 @@ public class AzureKubernetesStack : Stack
                     DisplayName = applicationName,
                 });
             var servicePrincipal = new ServicePrincipal(
-                $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}-",
+                $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}",
                 new ServicePrincipalArgs
                 {
                     ApplicationId = application.ApplicationId,
                 });
             var servicePrincipalPassword = new ServicePrincipalPassword(
-                $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}-",
+                $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
                 new ServicePrincipalPasswordArgs
                 {
                     EndDate = DateTime
@@ -77,64 +77,63 @@ public class AzureKubernetesStack : Stack
                         .AddYears(99)
                         .ToString("o", CultureInfo.InvariantCulture),
                     ServicePrincipalId = servicePrincipal.Id,
-
-                    // Value = password.Result,
-                    // EndDate = "2099-01-01T00:00:00Z"
                 });
 
             var kubernetesCluster = new ManagedCluster(
                 $"kubernetes-{location}-{Configuration.Environment}-",
                 new ManagedClusterArgs
-            {
-                ResourceGroupName = resourceGroup.Name,
-                AgentPoolProfiles = new InputList<ManagedClusterAgentPoolProfileArgs>()
                 {
-                    new ManagedClusterAgentPoolProfileArgs()
+                    ResourceGroupName = resourceGroup.Name,
+                    AgentPoolProfiles = new InputList<ManagedClusterAgentPoolProfileArgs>()
                     {
-                        Count = 2,
-                        MaxPods = 110,
-                        Mode = AgentPoolMode.System,
-                        Name = $"default",
-                        OsDiskSizeGB = 30,
-                        OsType = "Linux",
-                        Tags = GetTags(location),
-                        Type = AgentPoolType.VirtualMachineScaleSets,
-                        VmSize = "Standard_B2s",
-                        VnetSubnetID = subnet.Id,
+                        new ManagedClusterAgentPoolProfileArgs()
+                        {
+                            Count = 2,
+                            MaxPods = 110,
+                            Mode = AgentPoolMode.System,
+                            Name = $"default",
+                            OsDiskSizeGB = 30,
+                            OsType = "Linux",
+                            Tags = GetTags(location),
+                            Type = AgentPoolType.VirtualMachineScaleSets,
+                            VmSize = "Standard_B2s",
+                            VnetSubnetID = subnet.Id,
+                        },
                     },
-                },
-                DnsPrefix = "AzureNativeprovider",
-                EnableRBAC = true,
-                Tags = GetTags(location),
-                // KubernetesVersion = "1.18.14",
-                NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetes-nodes-{location}-{Configuration.Environment}-",
-                NetworkProfile = new ContainerServiceNetworkProfileArgs()
-                {
-                    NetworkPlugin = NetworkPlugin.Azure,
-                    DnsServiceIP = "10.0.2.254",
-                    ServiceCidr = "10.0.2.0/24",
-                    DockerBridgeCidr = "172.17.0.1/16",
-                },
-                ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs
-                {
-                    ClientId = application.ApplicationId,
-                    Secret = servicePrincipalPassword.Value,
-                },
-                //AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
-                //{
-                //    {
-                //        "omsAgent",
-                //        new ManagedClusterAddonProfileArgs()
-                //        {
-                //            Enabled = true,
-                //            Config = new InputMap<string>()
-                //            {
-                //                { "logAnalyticsWorkspaceId", workspace.Id },
-                //            },
-                //        },
-                //    },
-                //},
-            });
+                    DnsPrefix = "AzureNativeprovider",
+                    EnableRBAC = true,
+                    Tags = GetTags(location),
+
+                    // KubernetesVersion = "1.18.14",
+                    NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetes-nodes-{location}-{Configuration.Environment}-",
+                    NetworkProfile = new ContainerServiceNetworkProfileArgs()
+                    {
+                        NetworkPlugin = NetworkPlugin.Azure,
+                        DnsServiceIP = "10.0.2.254",
+                        ServiceCidr = "10.0.2.0/24",
+                        DockerBridgeCidr = "172.17.0.1/16",
+                    },
+                    ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs
+                    {
+                        ClientId = application.ApplicationId,
+                        Secret = servicePrincipalPassword.Value,
+                    },
+
+                    // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
+                    // {
+                    //     {
+                    //         "omsAgent",
+                    //         new ManagedClusterAddonProfileArgs()
+                    //         {
+                    //             Enabled = true,
+                    //             Config = new InputMap<string>()
+                    //             {
+                    //                 { "logAnalyticsWorkspaceId", workspace.Id },
+                    //             },
+                    //         },
+                    //     },
+                    // },
+                });
 
             outputs.Add(GetKubeConfig(resourceGroup.Name, kubernetesCluster.Name));
         }
