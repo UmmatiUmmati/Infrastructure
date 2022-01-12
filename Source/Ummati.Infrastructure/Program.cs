@@ -5,5 +5,5 @@ using Ummati.Infrastructure.Stacks;
 
 public static class Program
 {
-    public static Task<int> Main() => Deployment.RunAsync<AzureContainerAppStack>();
+    public static Task<int> Main() => Deployment.RunAsync<AzureKubernetesStack>();
 }

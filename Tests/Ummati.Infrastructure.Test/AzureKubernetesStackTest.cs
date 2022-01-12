@@ -3,14 +3,15 @@ namespace Ummati.Infrastructure.Test;
 using System.Collections.Immutable;
 using Pulumi;
 using Pulumi.Utilities;
+using Ummati.Infrastructure.Stacks;
 using Xunit;
 
-public class AzureContainerAppStackTest
+public class AzureKubernetesStackTest
 {
     [Fact]
     public async Task AllResourcesHaveTagsAsync()
     {
-        AzureContainerAppStack.Configuration = new TestConfiguration()
+        AzureKubernetesStack.Configuration = new TestConfiguration()
         {
             ApplicationName = "test-app",
             CommonLocation = "northeurope",
@@ -24,7 +25,7 @@ public class AzureContainerAppStackTest
             Locations = ImmutableArray.Create("northeurope", "canadacentral"),
         };
 
-        var resources = await Testing.RunAsync<AzureContainerAppStack>().ConfigureAwait(false);
+        var resources = await Testing.RunAsync<AzureKubernetesStack>().ConfigureAwait(false);
 
         foreach (var resource in resources)
         {
