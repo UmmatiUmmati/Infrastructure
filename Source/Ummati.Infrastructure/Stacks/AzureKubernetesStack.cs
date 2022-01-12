@@ -150,13 +150,13 @@ public class AzureKubernetesStack : Stack
     private static Output<string> GetKubeConfig(Output<string> resourceGroupName, Output<string> clusterName)
     {
         var output = ListManagedClusterUserCredentials.Invoke(
-            new ListManagedClusterUserCredentialsInvokeArgs
+            new ListManagedClusterUserCredentialsInvokeArgs()
             {
                 ResourceGroupName = resourceGroupName,
                 ResourceName = clusterName,
             });
-        return output.Apply(
-            credentials =>
+        return output
+            .Apply(credentials =>
             {
                 try
                 {
@@ -169,7 +169,8 @@ public class AzureKubernetesStack : Stack
                     // Returned in tests.
                     return string.Empty;
                 }
-            });
+            })
+            .Apply(Output.CreateSecret);
     }
 
     private static Dictionary<string, string> GetTags(string location) =>
