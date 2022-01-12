@@ -1,8 +1,18 @@
 config:
+  azure-native:clientId: 56e5f9a6-2305-4d16-b10a-b59863a45bea
+  azure-native:clientSecret:
+    secure: AAABAH1E90xVU7pwVhUID+3W0dpGTAXg7hNqTjReFZ4EnQ/QbhpU2ObElgk2ujx10e9mQPmpYOsvdY8AF5vzVprC
+  azure-native:subscriptionId: dc01c77f-7452-4828-b574-3330cfbc06df
+  azure-native:tenantId: 7d8ca406-ffc4-41d6-ae03-a297a0943b62
   ummati:ApplicationName: ummati
   ummati:CommonLocation: northeurope
-  ummati:ContainerImageName: mcr.microsoft.com/dotnet/samples:aspnetapp
+  ummati:ContainerImageName: muhammadrehansaeed/api:0.0.0-preview.0
+  ummati:ContainerCpu: 0.25
+  ummati:ContainerMemory: 0.5Gi
+  ummati:ContainerMinReplicas: 1
+  ummati:ContainerMaxReplicas: 10
+  ummati:ContainerConcurrentRequests: 50
   ummati:Environment: development
   ummati:Locations:
-    - canadacentral
-    - northeurope
+  - canadacentral
+  - northeurope
