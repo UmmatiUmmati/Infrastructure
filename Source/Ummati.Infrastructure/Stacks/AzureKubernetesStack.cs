@@ -158,9 +158,17 @@ public class AzureKubernetesStack : Stack
         return output.Apply(
             credentials =>
             {
-                var encoded = credentials.Kubeconfigs[0].Value;
-                var data = Convert.FromBase64String(encoded);
-                return Encoding.UTF8.GetString(data);
+                try
+                {
+                    var base64EncodedKubeConfig = credentials.Kubeconfigs.First().Value;
+                    var kubeConfig = Convert.FromBase64String(base64EncodedKubeConfig);
+                    return Encoding.UTF8.GetString(kubeConfig);
+                }
+                catch (NullReferenceException)
+                {
+                    // Returned in tests.
+                    return string.Empty;
+                }
             });
     }
 
