@@ -76,10 +76,14 @@ Task("UpdateServicePrincipal")
         Information($"TenantId: {tenantId}");
         Information($"SubscriptionId: {subscriptionId}");
 
-        SetPulumiConfig("azure-native:clientId", clientId);
+        SetPulumiConfig("azuread:clientId", clientId, secret: true);
+        SetPulumiConfig("azuread:clientSecret", clientSecret, secret: true);
+        SetPulumiConfig("azuread:tenantId", tenantId, secret: true);
+
+        SetPulumiConfig("azure-native:clientId", clientId, secret: true);
         SetPulumiConfig("azure-native:clientSecret", clientSecret, secret: true);
-        SetPulumiConfig("azure-native:tenantId", tenantId);
-        SetPulumiConfig("azure-native:subscriptionId", subscriptionId);
+        SetPulumiConfig("azure-native:tenantId", tenantId, secret: true);
+        SetPulumiConfig("azure-native:subscriptionId", subscriptionId, secret: true);
     });
 
 Task("Default")
