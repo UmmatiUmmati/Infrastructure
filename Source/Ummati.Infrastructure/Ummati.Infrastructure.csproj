@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
-    <PackageReference Include="Pulumi.AzureAD" Version="5.13.0" />
-    <PackageReference Include="Pulumi.AzureNative" Version="1.53.0" />
-    <PackageReference Include="Pulumi.Kubernetes" Version="3.13.0" />
+    <PackageReference Include="Pulumi.AzureAD" Version="5.16.0" />
+    <PackageReference Include="Pulumi.AzureNative" Version="1.56.0" />
+    <PackageReference Include="Pulumi.Kubernetes" Version="3.15.2" />
   </ItemGroup>
 
 </Project>

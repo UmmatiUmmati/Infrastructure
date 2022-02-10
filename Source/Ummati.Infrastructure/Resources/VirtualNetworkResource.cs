@@ -1,8 +1,6 @@
 namespace Ummati.Infrastructure.Resources;
 
 using Pulumi;
-using Pulumi.AzureNative.Network;
-using Pulumi.AzureNative.Network.Inputs;
 
 public class VirtualNetworkResource : ComponentResource
 {
