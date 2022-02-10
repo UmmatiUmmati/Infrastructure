@@ -14,5 +14,4 @@ config:
   ummati:ContainerMinReplicas: "1"
   ummati:Environment: development
   ummati:Locations:
-  - canadacentral
   - northeurope
