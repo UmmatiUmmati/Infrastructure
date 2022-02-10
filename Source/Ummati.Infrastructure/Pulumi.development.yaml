@@ -1,7 +1,7 @@
 config:
   azure-native:clientId: 3e85af3b-48d7-42e1-9393-71a2889f82e3
   azure-native:clientSecret:
-    secure: AAABAKi92b2ejM+ZZ3CN6HtXiE4acqJRtPbSHavwqnTc7r61qWaJbGhg1O5yDFopvc+a6EfzDlKekdMC+nMBYM/l
+    secure: AAABABWDPM4S3KFALJJs+M4EMw6ipsP2gmYPtyXEVBIAaLUZ9d/kdDvJRkk/Hpe6oPZVmQTnuortYAMzkgRND101
   azure-native:subscriptionId: dc01c77f-7452-4828-b574-3330cfbc06df
   azure-native:tenantId: 7d8ca406-ffc4-41d6-ae03-a297a0943b62
   ummati:ApplicationName: ummati
