@@ -104,7 +104,7 @@ RunTarget(target);
                 .Append("sp")
                 .Append("create-for-rbac")
                 .AppendSwitchQuoted("--name", name)
-                .AppendSwitchQuoted("--role", "Contributor"))
+                .AppendSwitch("--role", "'User Access Administrator'"))
             .SetRedirectStandardOutput(true),
             out var lines);
 
