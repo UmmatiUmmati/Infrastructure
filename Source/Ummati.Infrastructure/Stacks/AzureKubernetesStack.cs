@@ -58,19 +58,19 @@ public class AzureKubernetesStack : Stack
             var applicationName = $"{Configuration.ApplicationName}-application-{location}-{Configuration.Environment}";
             var application = new Application(
                 applicationName,
-                new ApplicationArgs
+                new ApplicationArgs()
                 {
                     DisplayName = applicationName,
                 });
             var servicePrincipal = new ServicePrincipal(
                 $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}",
-                new ServicePrincipalArgs
+                new ServicePrincipalArgs()
                 {
                     ApplicationId = application.ApplicationId,
                 });
             var servicePrincipalPassword = new ServicePrincipalPassword(
                 $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
-                new ServicePrincipalPasswordArgs
+                new ServicePrincipalPasswordArgs()
                 {
                     EndDate = DateTime
                         .Today
@@ -81,15 +81,15 @@ public class AzureKubernetesStack : Stack
 
             var kubernetesCluster = new ManagedCluster(
                 $"kubernetes-{location}-{Configuration.Environment}-",
-                new ManagedClusterArgs
+                new ManagedClusterArgs()
                 {
                     ResourceGroupName = resourceGroup.Name,
                     AgentPoolProfiles = new InputList<ManagedClusterAgentPoolProfileArgs>()
                     {
                         new ManagedClusterAgentPoolProfileArgs()
                         {
-                            Count = 2,
-                            MaxPods = 110,
+                            Count = 2, // Maximum 100
+                            MaxPods = 250, // Maximum 250, default 30
                             Mode = AgentPoolMode.System,
                             Name = $"default",
                             OsDiskSizeGB = 30,
@@ -104,7 +104,7 @@ public class AzureKubernetesStack : Stack
                     EnableRBAC = true,
                     Tags = GetTags(location),
 
-                    // KubernetesVersion = "1.18.14",
+                    // KubernetesVersion = "1.22.4", // You can only upgrade one minor version at a time.
                     NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetes-nodes-{location}-{Configuration.Environment}-",
                     NetworkProfile = new ContainerServiceNetworkProfileArgs()
                     {
