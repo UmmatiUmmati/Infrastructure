@@ -31,7 +31,7 @@ jobs:
         run: dotnet cake --target=Test
         shell: pwsh
       - name: "Pulumi Preview"
-        uses: pulumi/actions@v3.12.1
+        uses: pulumi/actions@v3.15.0
         with:
           command: preview
           stack-name: development
