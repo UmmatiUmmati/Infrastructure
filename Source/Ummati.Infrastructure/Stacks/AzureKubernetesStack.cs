@@ -1,17 +1,17 @@
 namespace Ummati.Infrastructure.Stacks;
 
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Text;
 using Pulumi;
-using Pulumi.AzureNative.Resources;
+using Pulumi.AzureAD;
+using Pulumi.AzureNative.ContainerService;
+using Pulumi.AzureNative.ContainerService.Inputs;
 using Pulumi.AzureNative.Network;
 using Pulumi.AzureNative.Network.Inputs;
 using Pulumi.AzureNative.OperationalInsights;
 using Pulumi.AzureNative.OperationalInsights.Inputs;
-using System.Collections.Immutable;
-using Pulumi.AzureNative.ContainerService;
-using Pulumi.AzureNative.ContainerService.Inputs;
-using System.Text;
-using Pulumi.AzureAD;
-using System.Globalization;
+using Pulumi.AzureNative.Resources;
 
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
 public class AzureKubernetesStack : Stack
