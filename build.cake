@@ -69,6 +69,7 @@ Task("UpdateServicePrincipal")
     .Does(() =>
     {
         var subscriptionId = GetSubscriptionId();
+        DeleteServicePrincipal(servicePrincipalName);
         var (clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName);
 
         Information($"ClientId: {clientId}");
@@ -93,6 +94,51 @@ Task("Default")
 
 RunTarget(target);
 
+string GetSubscriptionId()
+{
+    StartProcess(
+        "powershell",
+        new ProcessSettings()
+            .WithArguments(x => x
+                .Append("az")
+                .Append("account")
+                .Append("show")
+                .AppendSwitch("--query", "id")
+                .AppendSwitch("--output", "tsv"))
+            .SetRedirectStandardOutput(true),
+            out var lines);
+    return lines.First();
+}
+
+void DeleteServicePrincipal(string name)
+{
+    StartProcess(
+        "powershell",
+        new ProcessSettings()
+            .WithArguments(x => x
+                .Append("az")
+                .Append("ad")
+                .Append("sp")
+                .Append("list")
+                .AppendSwitchQuoted("--display-name", name))
+            .SetRedirectStandardOutput(true),
+            out var lines);
+    var document = System.Text.Json.JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
+    foreach (var item in document.EnumerateArray())
+    {
+        var clientId = item.GetProperty("appId").GetString();
+        StartProcess(
+            "powershell",
+            new ProcessSettings()
+                .WithArguments(x => x
+                    .Append("az")
+                    .Append("ad")
+                    .Append("sp")
+                    .Append("delete")
+                    .AppendSwitchQuoted("--id", clientId)));
+    }
+}
+
 (string clientId, string clientSecret, string tenantId) CreateServicePrincipal(string name)
 {
     StartProcess(
@@ -113,22 +159,6 @@ RunTarget(target);
     var clientSecret = document.GetProperty("password").GetString();
     var tenantId = document.GetProperty("tenant").GetString();
     return (clientId, clientSecret, tenantId);
-}
-
-string GetSubscriptionId()
-{
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("account")
-                .Append("show")
-                .AppendSwitch("--query", "id")
-                .AppendSwitch("--output", "tsv"))
-            .SetRedirectStandardOutput(true),
-            out var lines);
-    return lines.First();
 }
 
 void SetPulumiConfig(string key, string value, bool secret = false)
