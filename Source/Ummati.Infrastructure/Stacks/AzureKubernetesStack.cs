@@ -50,7 +50,7 @@ public class AzureKubernetesStack : Stack
                 $"subnet-{location}-{Configuration.Environment}",
                 new Pulumi.AzureNative.Network.SubnetArgs()
                 {
-                    AddressPrefix = $"10.0.0.0/24",
+                    AddressPrefix = $"10.0.0.0/23",
                     ResourceGroupName = resourceGroup.Name,
                     VirtualNetworkName = virtualNetwork.Name,
                 });
@@ -88,7 +88,7 @@ public class AzureKubernetesStack : Stack
                     {
                         new ManagedClusterAgentPoolProfileArgs()
                         {
-                            Count = 2, // Maximum 100
+                            Count = 1, // Maximum 100
                             MaxPods = 250, // Maximum 250, default 30
                             Mode = AgentPoolMode.System,
                             Name = $"default",

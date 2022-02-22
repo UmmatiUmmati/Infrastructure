@@ -1,5 +1,7 @@
 name: Deploy
 
+concurrency: ${{matrix.environment}}
+
 on:
   push:
     branches:
@@ -16,8 +18,12 @@ env:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy-${{matrix.environment}}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - development
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2.4.0
@@ -36,7 +42,7 @@ jobs:
         uses: pulumi/actions@v3.12.1
         with:
           command: up
-          stack-name: development
+          stack-name: ${{matrix.environment}}
           work-dir: Source/Ummati.Infrastructure
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

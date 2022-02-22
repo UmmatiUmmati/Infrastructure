@@ -150,7 +150,7 @@ void DeleteServicePrincipal(string name)
                 .Append("sp")
                 .Append("create-for-rbac")
                 .AppendSwitchQuoted("--name", name)
-                .AppendSwitch("--role", "'User Access Administrator'"))
+                .AppendSwitchQuoted("--role", "Owner"))
             .SetRedirectStandardOutput(true),
             out var lines);
 
