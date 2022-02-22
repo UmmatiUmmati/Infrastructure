@@ -72,6 +72,7 @@ public class AzureKubernetesStack : Stack
                 $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
                 new ServicePrincipalPasswordArgs()
                 {
+                    // This cannot be changed after deployment.
                     EndDate = new DateTime(2999, 1, 1).ToString("o", CultureInfo.InvariantCulture),
                     ServicePrincipalId = servicePrincipal.Id,
                 });
