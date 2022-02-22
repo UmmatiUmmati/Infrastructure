@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 var target = Argument("Target", "Default");
 var configuration =
     HasArgument("Configuration") ? Argument<string>("Configuration") :
@@ -70,8 +72,10 @@ Task("UpdateServicePrincipal")
     {
         var subscriptionId = GetSubscriptionId();
         DeleteServicePrincipal(servicePrincipalName);
-        var (clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName);
+        var (objectId, clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName, subscriptionId);
+        CreateRoleAssignment(subscriptionId, objectId, "Managed Application Contributor Role");
 
+        Information($"ObjectId: {objectId}");
         Information($"ClientId: {clientId}");
         Information($"ClientSecret: {clientSecret}");
         Information($"TenantId: {tenantId}");
@@ -110,7 +114,7 @@ string GetSubscriptionId()
     return lines.First();
 }
 
-void DeleteServicePrincipal(string name)
+JsonElement.ArrayEnumerator GetServicePrincipals(string name)
 {
     StartProcess(
         "powershell",
@@ -123,8 +127,13 @@ void DeleteServicePrincipal(string name)
                 .AppendSwitchQuoted("--display-name", name))
             .SetRedirectStandardOutput(true),
             out var lines);
-    var document = System.Text.Json.JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
-    foreach (var item in document.EnumerateArray())
+    var document = JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
+    return document.EnumerateArray();
+}
+
+void DeleteServicePrincipal(string name)
+{
+    foreach (var item in GetServicePrincipals(name))
     {
         var clientId = item.GetProperty("appId").GetString();
         StartProcess(
@@ -139,7 +148,7 @@ void DeleteServicePrincipal(string name)
     }
 }
 
-(string clientId, string clientSecret, string tenantId) CreateServicePrincipal(string name)
+(string objectId, string clientId, string clientSecret, string tenantId) CreateServicePrincipal(string name, string subscriptionId)
 {
     StartProcess(
         "powershell",
@@ -150,15 +159,35 @@ void DeleteServicePrincipal(string name)
                 .Append("sp")
                 .Append("create-for-rbac")
                 .AppendSwitchQuoted("--name", name)
-                .AppendSwitchQuoted("--role", "Owner"))
+                .AppendSwitchQuoted("--role", "Contributor"))
             .SetRedirectStandardOutput(true),
             out var lines);
 
-    var document = System.Text.Json.JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
+    var document = JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
     var clientId = document.GetProperty("appId").GetString();
     var clientSecret = document.GetProperty("password").GetString();
     var tenantId = document.GetProperty("tenant").GetString();
-    return (clientId, clientSecret, tenantId);
+
+    var servicePrincipal = GetServicePrincipals(name).First();
+    var objectId = servicePrincipal.GetProperty("appId").GetString();
+
+    return (objectId, clientId, clientSecret, tenantId);
+}
+
+void CreateRoleAssignment(string subscriptionId, string objectId, string role)
+{
+    StartProcess(
+        "powershell",
+        new ProcessSettings()
+            .WithArguments(x => x
+                .Append("az")
+                .Append("role")
+                .Append("assignment")
+                .Append("create")
+                .AppendSwitchQuoted("--assignee", objectId)
+                .AppendSwitch("--role", $"'{role}'")
+                .AppendSwitchQuoted("--subscription", subscriptionId)));
+
 }
 
 void SetPulumiConfig(string key, string value, bool secret = false)
