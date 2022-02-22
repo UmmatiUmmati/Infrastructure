@@ -115,7 +115,7 @@ public class AzureKubernetesStack : Stack
                     Tags = GetTags(location),
 
                     // KubernetesVersion = "1.22.4", // You can only upgrade one minor version at a time.
-                    NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetes-nodes-{location}-{Configuration.Environment}-",
+                    NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetesnodes-{location}-{Configuration.Environment}",
                     NetworkProfile = new ContainerServiceNetworkProfileArgs()
                     {
                         NetworkPlugin = NetworkPlugin.Azure,
