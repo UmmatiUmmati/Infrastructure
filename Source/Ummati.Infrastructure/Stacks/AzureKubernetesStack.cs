@@ -1,7 +1,6 @@
 namespace Ummati.Infrastructure.Stacks;
 
 using System.Collections.Immutable;
-using System.Globalization;
 using System.Text;
 using Pulumi;
 using Pulumi.AzureAD;
@@ -30,6 +29,33 @@ public class AzureKubernetesStack : Stack
         var outputs = new List<Output<string>>();
         foreach (var location in Configuration.Locations)
         {
+            var applicationName = $"{Configuration.ApplicationName}-application-{location}-{Configuration.Environment}";
+            var application = new Application(
+                applicationName,
+                new ApplicationArgs()
+                {
+                    DisplayName = applicationName,
+                    SupportUrl = "https://github.com/UmmatiUmmati/Infrastructure",
+                    Tags = GetAzureActiveDirecoryTags(),
+                });
+            var servicePrincipal = new ServicePrincipal(
+                $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}",
+                new ServicePrincipalArgs()
+                {
+                    ApplicationId = application.ApplicationId,
+                    Description = GetAzureActiveDirectoryDescription(),
+                    Notes = GetAzureActiveDirectoryDescription(),
+                    Tags = GetAzureActiveDirecoryTags(),
+                });
+            var servicePrincipalPassword = new ServicePrincipalPassword(
+                $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
+                new ServicePrincipalPasswordArgs()
+                {
+                    // This cannot be changed after deployment.
+                    EndDate = new DateTime(2999, 1, 1).ToRFC3339String(),
+                    ServicePrincipalId = servicePrincipal.Id,
+                });
+
             var resourceGroup = GetResourceGroup("kubernetes", location);
             var virtualNetwork = new VirtualNetwork(
                 $"virtualnetwork-{location}-{Configuration.Environment}-",
@@ -54,27 +80,13 @@ public class AzureKubernetesStack : Stack
                     ResourceGroupName = resourceGroup.Name,
                     VirtualNetworkName = virtualNetwork.Name,
                 });
-
-            var applicationName = $"{Configuration.ApplicationName}-application-{location}-{Configuration.Environment}";
-            var application = new Application(
-                applicationName,
-                new ApplicationArgs()
+            var networkWatcher = new NetworkWatcher(
+                $"networkwatcher-{location}-{Configuration.Environment}-",
+                new NetworkWatcherArgs()
                 {
-                    DisplayName = applicationName,
-                });
-            var servicePrincipal = new ServicePrincipal(
-                $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}",
-                new ServicePrincipalArgs()
-                {
-                    ApplicationId = application.ApplicationId,
-                });
-            var servicePrincipalPassword = new ServicePrincipalPassword(
-                $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
-                new ServicePrincipalPasswordArgs()
-                {
-                    // This cannot be changed after deployment.
-                    EndDate = new DateTime(2100, 1, 1).ToString("o", CultureInfo.InvariantCulture),
-                    ServicePrincipalId = servicePrincipal.Id,
+                    Location = location,
+                    ResourceGroupName = resourceGroup.Name,
+                    Tags = GetTags(location),
                 });
 
             var kubernetesCluster = new ManagedCluster(
@@ -169,6 +181,12 @@ public class AzureKubernetesStack : Stack
             })
             .Apply(Output.CreateSecret);
     }
+
+    private static string GetAzureActiveDirectoryDescription() =>
+        string.Join(Environment.NewLine, GetAzureActiveDirecoryTags());
+
+    private static List<string> GetAzureActiveDirecoryTags() =>
+        GetTags("Azure Active Directory").Select(x => $"{x.Key}={x.Value}").ToList();
 
     private static Dictionary<string, string> GetTags(string location) =>
         new()
