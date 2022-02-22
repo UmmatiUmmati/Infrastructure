@@ -72,10 +72,7 @@ public class AzureKubernetesStack : Stack
                 $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
                 new ServicePrincipalPasswordArgs()
                 {
-                    EndDate = DateTime
-                        .Today
-                        .AddYears(99)
-                        .ToString("o", CultureInfo.InvariantCulture),
+                    EndDate = new DateTime(2999, 1, 1).ToString("o", CultureInfo.InvariantCulture),
                     ServicePrincipalId = servicePrincipal.Id,
                 });
 
