@@ -98,6 +98,7 @@ public class AzureKubernetesStack : Stack
                     {
                         new ManagedClusterAgentPoolProfileArgs()
                         {
+                            // Recommended minimum of 3.
                             Count = 1, // Maximum 100
                             MaxPods = 250, // Maximum 250, default 30
                             Mode = AgentPoolMode.System,
@@ -106,6 +107,8 @@ public class AzureKubernetesStack : Stack
                             OsType = "Linux",
                             Tags = GetTags(location),
                             Type = AgentPoolType.VirtualMachineScaleSets,
+
+                            // DS3_v2 is the minimum recommended and DS4_v2 is recommended.
                             VmSize = "Standard_B2s",
                             VnetSubnetID = subnet.Id,
                         },
