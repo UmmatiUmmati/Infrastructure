@@ -3,7 +3,6 @@ namespace Ummati.Infrastructure.Stacks;
 using System.Collections.Immutable;
 using System.Text;
 using Pulumi;
-using Pulumi.AzureAD;
 using Pulumi.AzureNative.ContainerService;
 using Pulumi.AzureNative.ContainerService.Inputs;
 using Pulumi.AzureNative.Network;
@@ -11,6 +10,7 @@ using Pulumi.AzureNative.Network.Inputs;
 using Pulumi.AzureNative.OperationalInsights;
 using Pulumi.AzureNative.OperationalInsights.Inputs;
 using Pulumi.AzureNative.Resources;
+using Ummati.Infrastructure.Resources;
 
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
 public class AzureKubernetesStack : Stack
@@ -29,32 +29,10 @@ public class AzureKubernetesStack : Stack
         var outputs = new List<Output<string>>();
         foreach (var location in Configuration.Locations)
         {
-            var applicationName = $"{Configuration.ApplicationName}-application-{location}-{Configuration.Environment}";
-            var application = new Application(
-                applicationName,
-                new ApplicationArgs()
-                {
-                    DisplayName = applicationName,
-                    SupportUrl = "https://github.com/UmmatiUmmati/Infrastructure",
-                    Tags = GetAzureActiveDirecoryTags(),
-                });
-            var servicePrincipal = new ServicePrincipal(
-                $"{Configuration.ApplicationName}-service-principal-{location}-{Configuration.Environment}",
-                new ServicePrincipalArgs()
-                {
-                    ApplicationId = application.ApplicationId,
-                    Description = GetAzureActiveDirectoryDescription(),
-                    Notes = GetAzureActiveDirectoryDescription(),
-                    Tags = GetAzureActiveDirecoryTags(),
-                });
-            var servicePrincipalPassword = new ServicePrincipalPassword(
-                $"{Configuration.ApplicationName}-service-principal-password-{location}-{Configuration.Environment}",
-                new ServicePrincipalPasswordArgs()
-                {
-                    // This cannot be changed after deployment.
-                    EndDate = new DateTime(2999, 1, 1).ToRFC3339String(),
-                    ServicePrincipalId = servicePrincipal.Id,
-                });
+            var identityResource = new IdentityResource(
+                $"identity-{location}-{Configuration.Environment}-",
+                Configuration,
+                location);
 
             var resourceGroup = GetResourceGroup("kubernetes", location);
             var virtualNetwork = new VirtualNetwork(
@@ -70,7 +48,7 @@ public class AzureKubernetesStack : Stack
                     },
                     Location = location,
                     ResourceGroupName = resourceGroup.Name,
-                    Tags = GetTags(location),
+                    Tags = Configuration.GetTags(location),
                 });
             var subnet = new Subnet(
                 $"subnet-{location}-{Configuration.Environment}",
@@ -86,7 +64,7 @@ public class AzureKubernetesStack : Stack
                 {
                     Location = location,
                     ResourceGroupName = resourceGroup.Name,
-                    Tags = GetTags(location),
+                    Tags = Configuration.GetTags(location),
                 });
 
             var kubernetesCluster = new ManagedCluster(
@@ -105,7 +83,7 @@ public class AzureKubernetesStack : Stack
                             Name = $"default",
                             OsDiskSizeGB = 30,
                             OsType = "Linux",
-                            Tags = GetTags(location),
+                            Tags = Configuration.GetTags(location),
                             Type = AgentPoolType.VirtualMachineScaleSets,
 
                             // DS3_v2 is the minimum recommended and DS4_v2 is recommended.
@@ -115,7 +93,7 @@ public class AzureKubernetesStack : Stack
                     },
                     DnsPrefix = "AzureNativeprovider",
                     EnableRBAC = true,
-                    Tags = GetTags(location),
+                    Tags = Configuration.GetTags(location),
 
                     // KubernetesVersion = "1.22.4", // You can only upgrade one minor version at a time.
                     NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetesnodes-{location}-{Configuration.Environment}",
@@ -128,8 +106,8 @@ public class AzureKubernetesStack : Stack
                     },
                     ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs
                     {
-                        ClientId = application.ApplicationId,
-                        Secret = servicePrincipalPassword.Value,
+                        ClientId = identityResource.ClientId,
+                        Secret = identityResource.ClientSecret,
                     },
 
                     // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
@@ -185,27 +163,13 @@ public class AzureKubernetesStack : Stack
             .Apply(Output.CreateSecret);
     }
 
-    private static string GetAzureActiveDirectoryDescription() =>
-        string.Join(Environment.NewLine, GetAzureActiveDirecoryTags());
-
-    private static List<string> GetAzureActiveDirecoryTags() =>
-        GetTags("Azure Active Directory").Select(x => $"{x.Key}={x.Value}").ToList();
-
-    private static Dictionary<string, string> GetTags(string location) =>
-        new()
-        {
-            { TagName.Application, Configuration.ApplicationName },
-            { TagName.Environment, Configuration.Environment },
-            { TagName.Location, location },
-        };
-
     private static ResourceGroup GetResourceGroup(string name, string location) =>
         new(
             $"{Configuration.ApplicationName}-{name}-{location}-{Configuration.Environment}-",
             new ResourceGroupArgs()
             {
                 Location = location,
-                Tags = GetTags(location),
+                Tags = Configuration.GetTags(location),
             });
 
     private static Workspace GetWorkspace(string location, ResourceGroup resourceGroup) =>
@@ -220,6 +184,6 @@ public class AzureKubernetesStack : Stack
                 {
                     Name = WorkspaceSkuNameEnum.PerGB2018,
                 },
-                Tags = GetTags(location),
+                Tags = Configuration.GetTags(location),
             });
 }

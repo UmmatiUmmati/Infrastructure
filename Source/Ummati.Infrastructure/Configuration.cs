@@ -34,4 +34,18 @@ public class Configuration : IConfiguration
     public int ContainerMinReplicas => int.Parse(this.config.Require(nameof(this.ContainerMinReplicas)), CultureInfo.InvariantCulture);
 
     public int ContainerConcurrentRequests => int.Parse(this.config.Require(nameof(this.ContainerConcurrentRequests)), CultureInfo.InvariantCulture);
+
+    public string GetAzureActiveDirectoryDescription() =>
+        string.Join(System.Environment.NewLine, this.GetAzureActiveDirecoryTags());
+
+    public List<string> GetAzureActiveDirecoryTags() =>
+        this.GetTags("Azure Active Directory").Select(x => $"{x.Key}={x.Value}").ToList();
+
+    public Dictionary<string, string> GetTags(string location) =>
+        new()
+        {
+            { TagName.Application, this.ApplicationName },
+            { TagName.Environment, this.Environment },
+            { TagName.Location, location },
+        };
 }

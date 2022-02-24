@@ -23,4 +23,18 @@ public class TestConfiguration : IConfiguration
     public int ContainerMinReplicas { get; init; } = default!;
 
     public int ContainerConcurrentRequests { get; init; } = default!;
+
+    public string GetAzureActiveDirectoryDescription() =>
+        string.Join(System.Environment.NewLine, this.GetAzureActiveDirecoryTags());
+
+    public List<string> GetAzureActiveDirecoryTags() =>
+        this.GetTags("Azure Active Directory").Select(x => $"{x.Key}={x.Value}").ToList();
+
+    public Dictionary<string, string> GetTags(string location) =>
+        new()
+        {
+            { TagName.Application, this.ApplicationName },
+            { TagName.Environment, this.Environment },
+            { TagName.Location, location },
+        };
 }
