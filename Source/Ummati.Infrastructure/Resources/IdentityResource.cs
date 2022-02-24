@@ -14,18 +14,7 @@ public class IdentityResource : ComponentResource
         : base($"{configuration.ApplicationName}:{nameof(IdentityResource)}", name, options)
 #pragma warning restore CA1062 // Validate arguments of public methods
     {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
+        Validate(name, location);
 
         var azureActiveDirectoryTags = configuration.GetAzureActiveDirecoryTags();
         var azureActiveDirectoryDescription = configuration.GetAzureActiveDirectoryDescription();
@@ -66,4 +55,20 @@ public class IdentityResource : ComponentResource
     public Output<string> ClientId { get; set; }
 
     public Output<string> ClientSecret { get; set; }
+
+    private static void Validate(string name, string location)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(location);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
+        }
+
+        if (string.IsNullOrEmpty(location))
+        {
+            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
+        }
+    }
 }

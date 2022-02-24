@@ -18,19 +18,7 @@ public class CommonResource : ComponentResource
         : base($"{configuration.ApplicationName}:{nameof(CommonResource)}", name, options)
 #pragma warning restore CA1062 // Validate arguments of public methods
     {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-        ArgumentNullException.ThrowIfNull(resourceGroup);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
+        Validate(name, location, resourceGroup);
 
         var workspace = new Workspace(
             $"log-analytics-{location}-{configuration.Environment}-",
@@ -52,4 +40,21 @@ public class CommonResource : ComponentResource
     }
 
     public Output<string> WorkspaceId { get; set; }
+
+    private static void Validate(string name, string location, ResourceGroup resourceGroup)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(location);
+        ArgumentNullException.ThrowIfNull(resourceGroup);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
+        }
+
+        if (string.IsNullOrEmpty(location))
+        {
+            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
+        }
+    }
 }

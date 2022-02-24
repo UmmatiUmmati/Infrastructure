@@ -21,22 +21,7 @@ public class KubernetesResource : ComponentResource
         : base($"{configuration.ApplicationName}:{nameof(KubernetesResource)}", name, options)
 #pragma warning restore CA1062 // Validate arguments of public methods
     {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-        ArgumentNullException.ThrowIfNull(resourceGroup);
-        ArgumentNullException.ThrowIfNull(commonResource);
-        ArgumentNullException.ThrowIfNull(identityResource);
-        ArgumentNullException.ThrowIfNull(virtualNetworkResource);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
+        Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
 
         var kubernetesCluster = new ManagedCluster(
             $"kubernetes-{location}-{configuration.Environment}-",
@@ -103,6 +88,26 @@ public class KubernetesResource : ComponentResource
     }
 
     public Output<string> KubeConfig { get; set; }
+
+    private static void Validate(string name, string location, ResourceGroup resourceGroup, CommonResource commonResource, IdentityResource identityResource, VirtualNetworkResource virtualNetworkResource)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(location);
+        ArgumentNullException.ThrowIfNull(resourceGroup);
+        ArgumentNullException.ThrowIfNull(commonResource);
+        ArgumentNullException.ThrowIfNull(identityResource);
+        ArgumentNullException.ThrowIfNull(virtualNetworkResource);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
+        }
+
+        if (string.IsNullOrEmpty(location))
+        {
+            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
+        }
+    }
 
     private static Output<string> GetKubeConfig(
         Output<string> resourceGroupName,
