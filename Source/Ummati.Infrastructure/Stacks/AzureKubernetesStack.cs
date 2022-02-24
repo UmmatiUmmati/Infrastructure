@@ -2,8 +2,6 @@ namespace Ummati.Infrastructure.Stacks;
 
 using System.Collections.Immutable;
 using Pulumi;
-using Pulumi.AzureNative.OperationalInsights;
-using Pulumi.AzureNative.OperationalInsights.Inputs;
 using Pulumi.AzureNative.Resources;
 using Ummati.Infrastructure.Resources;
 
@@ -19,7 +17,11 @@ public class AzureKubernetesStack : Stack
         }
 
         var commonResourceGroup = GetResourceGroup("common", Configuration.CommonLocation);
-        var workspace = GetWorkspace(Configuration.CommonLocation, commonResourceGroup);
+        var commonResource = new CommonResource(
+            $"common-{Configuration.CommonLocation}-{Configuration.Environment}-",
+            Configuration,
+            Configuration.CommonLocation,
+            commonResourceGroup);
 
         var outputs = new List<Output<string>>();
         foreach (var location in Configuration.Locations)
@@ -42,6 +44,7 @@ public class AzureKubernetesStack : Stack
                 Configuration,
                 location,
                 resourceGroup,
+                commonResource,
                 identityResource,
                 virtualNetworkResource);
 
@@ -62,21 +65,6 @@ public class AzureKubernetesStack : Stack
             new ResourceGroupArgs()
             {
                 Location = location,
-                Tags = Configuration.GetTags(location),
-            });
-
-    private static Workspace GetWorkspace(string location, ResourceGroup resourceGroup) =>
-        new(
-            $"log-analytics-{location}-{Configuration.Environment}-",
-            new WorkspaceArgs()
-            {
-                Location = location,
-                ResourceGroupName = resourceGroup.Name,
-                RetentionInDays = 30,
-                Sku = new WorkspaceSkuArgs()
-                {
-                    Name = WorkspaceSkuNameEnum.PerGB2018,
-                },
                 Tags = Configuration.GetTags(location),
             });
 }

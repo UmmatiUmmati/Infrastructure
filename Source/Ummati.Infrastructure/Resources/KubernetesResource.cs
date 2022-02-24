@@ -13,6 +13,7 @@ public class KubernetesResource : ComponentResource
         IConfiguration configuration,
         string location,
         ResourceGroup resourceGroup,
+        CommonResource commonResource,
         IdentityResource identityResource,
         VirtualNetworkResource virtualNetworkResource,
         ComponentResourceOptions? options = null)
@@ -23,6 +24,7 @@ public class KubernetesResource : ComponentResource
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(location);
         ArgumentNullException.ThrowIfNull(resourceGroup);
+        ArgumentNullException.ThrowIfNull(commonResource);
         ArgumentNullException.ThrowIfNull(identityResource);
         ArgumentNullException.ThrowIfNull(virtualNetworkResource);
 
@@ -88,7 +90,7 @@ public class KubernetesResource : ComponentResource
                 //             Enabled = true,
                 //             Config = new InputMap<string>()
                 //             {
-                //                 { "logAnalyticsWorkspaceId", workspace.Id },
+                //                 { "logAnalyticsWorkspaceId", commonResource.WorkspaceId },
                 //             },
                 //         },
                 //     },
