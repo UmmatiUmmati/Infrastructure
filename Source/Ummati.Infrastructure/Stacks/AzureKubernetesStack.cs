@@ -1,12 +1,7 @@
 namespace Ummati.Infrastructure.Stacks;
 
 using System.Collections.Immutable;
-using System.Text;
 using Pulumi;
-using Pulumi.AzureNative.ContainerService;
-using Pulumi.AzureNative.ContainerService.Inputs;
-using Pulumi.AzureNative.Network;
-using Pulumi.AzureNative.Network.Inputs;
 using Pulumi.AzureNative.OperationalInsights;
 using Pulumi.AzureNative.OperationalInsights.Inputs;
 using Pulumi.AzureNative.Resources;
@@ -35,98 +30,22 @@ public class AzureKubernetesStack : Stack
                 location);
 
             var resourceGroup = GetResourceGroup("kubernetes", location);
-            var virtualNetwork = new VirtualNetwork(
+
+            var virtualNetworkResource = new VirtualNetworkResource(
                 $"virtualnetwork-{location}-{Configuration.Environment}-",
-                new VirtualNetworkArgs()
-                {
-                    AddressSpace = new AddressSpaceArgs()
-                    {
-                        AddressPrefixes =
-                        {
-                            "10.0.0.0/16",
-                        },
-                    },
-                    Location = location,
-                    ResourceGroupName = resourceGroup.Name,
-                    Tags = Configuration.GetTags(location),
-                });
-            var subnet = new Subnet(
-                $"subnet-{location}-{Configuration.Environment}",
-                new Pulumi.AzureNative.Network.SubnetArgs()
-                {
-                    AddressPrefix = $"10.0.0.0/23",
-                    ResourceGroupName = resourceGroup.Name,
-                    VirtualNetworkName = virtualNetwork.Name,
-                });
-            var networkWatcher = new NetworkWatcher(
-                $"networkwatcher-{location}-{Configuration.Environment}-",
-                new NetworkWatcherArgs()
-                {
-                    Location = location,
-                    ResourceGroupName = resourceGroup.Name,
-                    Tags = Configuration.GetTags(location),
-                });
+                Configuration,
+                location,
+                resourceGroup);
 
-            var kubernetesCluster = new ManagedCluster(
-                $"kubernetes-{location}-{Configuration.Environment}-",
-                new ManagedClusterArgs()
-                {
-                    ResourceGroupName = resourceGroup.Name,
-                    AgentPoolProfiles = new InputList<ManagedClusterAgentPoolProfileArgs>()
-                    {
-                        new ManagedClusterAgentPoolProfileArgs()
-                        {
-                            // Recommended minimum of 3.
-                            Count = 1, // Maximum 100
-                            MaxPods = 250, // Maximum 250, default 30
-                            Mode = AgentPoolMode.System,
-                            Name = $"default",
-                            OsDiskSizeGB = 30,
-                            OsType = "Linux",
-                            Tags = Configuration.GetTags(location),
-                            Type = AgentPoolType.VirtualMachineScaleSets,
+            var kubernetesResource = new KubernetesResource(
+                $"virtualnetwork-{location}-{Configuration.Environment}-",
+                Configuration,
+                location,
+                resourceGroup,
+                identityResource,
+                virtualNetworkResource);
 
-                            // DS3_v2 is the minimum recommended and DS4_v2 is recommended.
-                            VmSize = "Standard_B2s",
-                            VnetSubnetID = subnet.Id,
-                        },
-                    },
-                    DnsPrefix = "AzureNativeprovider",
-                    EnableRBAC = true,
-                    Tags = Configuration.GetTags(location),
-
-                    // KubernetesVersion = "1.22.4", // You can only upgrade one minor version at a time.
-                    NodeResourceGroup = $"{Configuration.ApplicationName}-kubernetesnodes-{location}-{Configuration.Environment}",
-                    NetworkProfile = new ContainerServiceNetworkProfileArgs()
-                    {
-                        NetworkPlugin = NetworkPlugin.Azure,
-                        DnsServiceIP = "10.0.2.254",
-                        ServiceCidr = "10.0.2.0/24",
-                        DockerBridgeCidr = "172.17.0.1/16",
-                    },
-                    ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs
-                    {
-                        ClientId = identityResource.ClientId,
-                        Secret = identityResource.ClientSecret,
-                    },
-
-                    // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
-                    // {
-                    //     {
-                    //         "omsAgent",
-                    //         new ManagedClusterAddonProfileArgs()
-                    //         {
-                    //             Enabled = true,
-                    //             Config = new InputMap<string>()
-                    //             {
-                    //                 { "logAnalyticsWorkspaceId", workspace.Id },
-                    //             },
-                    //         },
-                    //     },
-                    // },
-                });
-
-            outputs.Add(GetKubeConfig(resourceGroup.Name, kubernetesCluster.Name));
+            outputs.Add(kubernetesResource.KubeConfig);
         }
 
         this.KubeConfigs = Output.All(outputs.Select(x => x));
@@ -136,32 +55,6 @@ public class AzureKubernetesStack : Stack
 
     [Output]
     public Output<ImmutableArray<string>> KubeConfigs { get; private set; }
-
-    private static Output<string> GetKubeConfig(Output<string> resourceGroupName, Output<string> clusterName)
-    {
-        var output = ListManagedClusterUserCredentials.Invoke(
-            new ListManagedClusterUserCredentialsInvokeArgs()
-            {
-                ResourceGroupName = resourceGroupName,
-                ResourceName = clusterName,
-            });
-        return output
-            .Apply(credentials =>
-            {
-                try
-                {
-                    var base64EncodedKubeConfig = credentials.Kubeconfigs.First().Value;
-                    var kubeConfig = Convert.FromBase64String(base64EncodedKubeConfig);
-                    return Encoding.UTF8.GetString(kubeConfig);
-                }
-                catch (NullReferenceException)
-                {
-                    // Returned in tests.
-                    return string.Empty;
-                }
-            })
-            .Apply(Output.CreateSecret);
-    }
 
     private static ResourceGroup GetResourceGroup(string name, string location) =>
         new(
