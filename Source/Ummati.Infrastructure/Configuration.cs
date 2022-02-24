@@ -3,6 +3,7 @@ namespace Ummati.Infrastructure;
 using System.Globalization;
 using System.Text.Json;
 using Pulumi;
+using Pulumi.AzureNative.ContainerService;
 
 #pragma warning disable CA1724 // Conflicts with System.Configuration
 public class Configuration : IConfiguration
@@ -10,30 +11,61 @@ public class Configuration : IConfiguration
 {
     private readonly Config config = new();
 
-    public string ApplicationName => this.config.Require(nameof(this.ApplicationName));
+    public string ApplicationName => this.GetString(nameof(this.ApplicationName));
 
-    public string CommonLocation => this.config.Require(nameof(this.CommonLocation));
+    public string Environment => this.GetString(nameof(this.Environment));
 
-    public IEnumerable<string> Locations =>
-        this.config
-            .RequireObject<JsonElement>(nameof(this.Locations))
-            .EnumerateArray()
-            .Select(x => x.GetString()!)
-            .Where(x => x is not null);
+    public string CommonLocation => this.GetString(nameof(this.CommonLocation));
 
-    public string Environment => this.config.Require(nameof(this.Environment));
+    public IEnumerable<string> Locations => this.GetStringCollection(nameof(this.Locations));
 
-    public string ContainerImageName => this.config.Require(nameof(this.ContainerImageName));
+    public IEnumerable<WeekDay> KubernetesMaintenanceDays =>
+        this.GetCollection(
+            nameof(this.KubernetesMaintenanceDays),
+            new Dictionary<string, WeekDay>()
+            {
+                { nameof(WeekDay.Monday), WeekDay.Monday },
+                { nameof(WeekDay.Tuesday), WeekDay.Tuesday },
+                { nameof(WeekDay.Wednesday), WeekDay.Wednesday },
+                { nameof(WeekDay.Thursday), WeekDay.Thursday },
+                { nameof(WeekDay.Friday), WeekDay.Friday },
+                { nameof(WeekDay.Saturday), WeekDay.Saturday },
+                { nameof(WeekDay.Sunday), WeekDay.Sunday },
+            });
 
-    public double ContainerCpu => double.Parse(this.config.Require(nameof(this.ContainerCpu)), CultureInfo.InvariantCulture);
+    public IEnumerable<int> KubernetesMaintenanceHourSlots =>
+        this.GetIntegerCollection(nameof(this.KubernetesMaintenanceHourSlots), minimum: 0, maximum: 24);
 
-    public string ContainerMemory => this.config.Require(nameof(this.ContainerMemory));
+    public int KubernetesMaximumPods => this.GetInteger(nameof(this.KubernetesMaximumPods), minimum: 1, maximum: 250);
 
-    public int ContainerMaxReplicas => int.Parse(this.config.Require(nameof(this.ContainerMaxReplicas)), CultureInfo.InvariantCulture);
+    public string KubernetesMaximumSurge => this.GetString(nameof(this.KubernetesMaximumSurge));
 
-    public int ContainerMinReplicas => int.Parse(this.config.Require(nameof(this.ContainerMinReplicas)), CultureInfo.InvariantCulture);
+    public int KubernetesNodeCount => this.GetInteger(nameof(this.KubernetesNodeCount), minimum: 0, maximum: 100);
 
-    public int ContainerConcurrentRequests => int.Parse(this.config.Require(nameof(this.ContainerConcurrentRequests)), CultureInfo.InvariantCulture);
+    public int KubernetesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesOsDiskSizeGB), minimum: 1);
+
+    public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy =>
+        this.Get(
+            nameof(this.KubernetesScaleSetEvictionPolicy),
+            new Dictionary<string, ScaleSetEvictionPolicy>()
+            {
+                { nameof(ScaleSetEvictionPolicy.Delete), ScaleSetEvictionPolicy.Delete },
+                { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
+            });
+
+    public string KubernetesVmSize => this.GetString(nameof(this.KubernetesVmSize));
+
+    public string ContainerImageName => this.GetString(nameof(this.ContainerImageName));
+
+    public double ContainerCpu => this.GetDouble(nameof(this.ContainerCpu));
+
+    public string ContainerMemory => this.GetString(nameof(this.ContainerMemory));
+
+    public int ContainerMaxReplicas => this.GetInteger(nameof(this.ContainerMaxReplicas));
+
+    public int ContainerMinReplicas => this.GetInteger(nameof(this.ContainerMinReplicas));
+
+    public int ContainerConcurrentRequests => this.GetInteger(nameof(this.ContainerConcurrentRequests));
 
     public string GetAzureActiveDirectoryDescription() =>
         string.Join(System.Environment.NewLine, this.GetAzureActiveDirecoryTags());
@@ -48,4 +80,77 @@ public class Configuration : IConfiguration
             { TagName.Environment, this.Environment },
             { TagName.Location, location },
         };
+
+    private static T GetFromMap<T>(string value, Dictionary<string, T> map)
+    {
+        if (map.ContainsKey(value))
+        {
+            return map[value];
+        }
+
+        throw new InvalidOperationException($"{typeof(T).Name} with value '{value}' not recognised.");
+    }
+
+    private double GetDouble(string key, double? minimum = null, double? maximum = null)
+    {
+        var value = double.Parse(this.config.Require(key), CultureInfo.InvariantCulture);
+        if (minimum.HasValue && value < minimum)
+        {
+            throw new InvalidOperationException($"{key} must be more than {minimum}");
+        }
+
+        if (maximum.HasValue && value > maximum)
+        {
+            throw new InvalidOperationException($"{key} must be les than {maximum}");
+        }
+
+        return value;
+    }
+
+    private int GetInteger(string key, int? minimum = null, int? maximum = null)
+    {
+        var value = int.Parse(this.config.Require(key), CultureInfo.InvariantCulture);
+        if (minimum.HasValue && value < minimum)
+        {
+            throw new InvalidOperationException($"{key} must be more than {minimum}");
+        }
+
+        if (maximum.HasValue && value > maximum)
+        {
+            throw new InvalidOperationException($"{key} must be les than {maximum}");
+        }
+
+        return value;
+    }
+
+    private string GetString(string key) => this.config.Require(key);
+
+    private IEnumerable<string> GetStringCollection(string key) =>
+        this.config
+            .RequireObject<JsonElement>(key)
+            .EnumerateArray()
+            .Select(x => x.GetString()!)
+            .Where(x => x is not null);
+
+    private IEnumerable<int> GetIntegerCollection(string key, int? minimum = null, int? maximum = null) =>
+        this.GetStringCollection(key).Select(x =>
+        {
+            var value = int.Parse(x, CultureInfo.InvariantCulture);
+            if (minimum.HasValue && value < minimum)
+            {
+                throw new InvalidOperationException($"{key} must be more than {minimum}");
+            }
+
+            if (maximum.HasValue && value > maximum)
+            {
+                throw new InvalidOperationException($"{key} must be les than {maximum}");
+            }
+
+            return value;
+        });
+
+    private IEnumerable<T> GetCollection<T>(string key, Dictionary<string, T> map) =>
+        this.GetStringCollection(key).Select(x => GetFromMap(x, map));
+
+    private T Get<T>(string key, Dictionary<string, T> map) => GetFromMap(this.config.Require(key), map);
 }

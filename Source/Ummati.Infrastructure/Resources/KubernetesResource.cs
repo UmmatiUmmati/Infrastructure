@@ -23,7 +23,7 @@ public class KubernetesResource : ComponentResource
     {
         Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
 
-        var kubernetesCluster = new ManagedCluster(
+        var managedCluster = new ManagedCluster(
             $"kubernetes-{location}-{configuration.Environment}-",
             new ManagedClusterArgs()
             {
@@ -32,18 +32,20 @@ public class KubernetesResource : ComponentResource
                 {
                     new ManagedClusterAgentPoolProfileArgs()
                     {
-                        // Recommended minimum of 3.
-                        Count = 1, // Maximum 100
-                        MaxPods = 250, // Maximum 250, default 30
+                        Count = configuration.KubernetesNodeCount,
+                        MaxPods = configuration.KubernetesMaximumPods,
                         Mode = AgentPoolMode.System,
-                        Name = $"default",
-                        OsDiskSizeGB = 30,
-                        OsType = "Linux",
+                        Name = "default",
+                        OsDiskSizeGB = configuration.KubernetesOsDiskSizeGB,
+                        OsType = OSType.Linux,
+                        ScaleSetEvictionPolicy = configuration.KubernetesScaleSetEvictionPolicy,
                         Tags = configuration.GetTags(location),
                         Type = AgentPoolType.VirtualMachineScaleSets,
-
-                        // DS3_v2 is the minimum recommended and DS4_v2 is recommended.
-                        VmSize = "Standard_B2s",
+                        UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
+                        {
+                            MaxSurge = configuration.KubernetesMaximumSurge,
+                        },
+                        VmSize = configuration.KubernetesVmSize,
                         VnetSubnetID = virtualNetworkResource.SubnetId,
                     },
                 },
@@ -82,14 +84,36 @@ public class KubernetesResource : ComponentResource
                 // },
             });
 
-        this.KubeConfig = GetKubeConfig(resourceGroup.Name, kubernetesCluster.Name);
+        var maintenanceConfiguration = new MaintenanceConfiguration(
+            $"maintenanceconfiguration-{location}-{configuration.Environment}",
+            new MaintenanceConfigurationArgs()
+            {
+                ResourceGroupName = resourceGroup.Name,
+                ResourceName = managedCluster.Name,
+                TimeInWeek = configuration.KubernetesMaintenanceDays
+                    .Select(day =>
+                        new TimeInWeekArgs()
+                        {
+                            Day = day,
+                            HourSlots = configuration.KubernetesMaintenanceHourSlots.ToList(),
+                        })
+                    .ToList(),
+            });
+
+        this.KubeConfig = GetKubeConfig(resourceGroup.Name, managedCluster.Name);
 
         this.RegisterOutputs();
     }
 
     public Output<string> KubeConfig { get; set; }
 
-    private static void Validate(string name, string location, ResourceGroup resourceGroup, CommonResource commonResource, IdentityResource identityResource, VirtualNetworkResource virtualNetworkResource)
+    private static void Validate(
+        string name,
+        string location,
+        ResourceGroup resourceGroup,
+        CommonResource commonResource,
+        IdentityResource identityResource,
+        VirtualNetworkResource virtualNetworkResource)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(location);

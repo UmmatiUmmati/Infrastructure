@@ -15,7 +15,7 @@ config:
   #  secure: AAABAEu1fpGZ+a7PaAIpLndkQ1gC77KeTn8IzMY1SBuFroLemf64QnTThuf96fNJxls8+9nhZoL2dRViY5NUD1RHw7I=
 
   ummati:ApplicationName: ummati
-  ummati:Environment: development
+  ummati:Environment: production
   ummati:CommonLocation: northeurope
   ummati:Locations:
     - northeurope
@@ -24,9 +24,9 @@ config:
   ummati:KubernetesMaintenanceHourSlots: ["1", "2"]
   ummati:KubernetesMaximumPods: "250"
   ummati:KubernetesMaximumSurge: "33%"
-  ummati:KubernetesNodeCount: "1"
+  ummati:KubernetesNodeCount: "3"
   ummati:KubernetesOsDiskSizeGB: "30"
-  ummati:KubernetesScaleSetEvictionPolicy: "Delete"
+  ummati:KubernetesScaleSetEvictionPolicy: "Deallocate"
   ummati:KubernetesVmSize: "Standard_B2s"
 
   ummati:ContainerConcurrentRequests: "50"

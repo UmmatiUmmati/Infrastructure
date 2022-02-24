@@ -1,16 +1,33 @@
 namespace Ummati.Infrastructure.Test;
 
 using System.Collections.Generic;
+using Pulumi.AzureNative.ContainerService;
 
 public class TestConfiguration : IConfiguration
 {
     public string ApplicationName { get; init; } = default!;
 
+    public string Environment { get; init; } = default!;
+
     public string CommonLocation { get; init; } = default!;
 
     public IEnumerable<string> Locations { get; init; } = default!;
 
-    public string Environment { get; init; } = default!;
+    public int KubernetesMaximumPods { get; set; } = default!;
+
+    public string KubernetesMaximumSurge { get; set; } = default!;
+
+    public int KubernetesNodeCount { get; set; } = default!;
+
+    public int KubernetesOsDiskSizeGB { get; set; } = default!;
+
+    public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy { get; set; } = default!;
+
+    public IEnumerable<WeekDay> KubernetesMaintenanceDays { get; set; } = default!;
+
+    public IEnumerable<int> KubernetesMaintenanceHourSlots { get; } = default!;
+
+    public string KubernetesVmSize { get; set; } = default!;
 
     public string ContainerImageName { get; init; } = default!;
 
