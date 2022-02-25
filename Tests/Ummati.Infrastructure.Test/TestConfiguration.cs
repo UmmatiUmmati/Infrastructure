@@ -25,7 +25,9 @@ public class TestConfiguration : IConfiguration
 
     public IEnumerable<WeekDay> KubernetesMaintenanceDays { get; set; } = default!;
 
-    public IEnumerable<int> KubernetesMaintenanceHourSlots { get; } = default!;
+    public IEnumerable<int> KubernetesMaintenanceHourSlots { get; set; } = default!;
+
+    public UpgradeChannel KubernetesUpgradeChannel { get; set; } = default!;
 
     public string KubernetesVmSize { get; set; } = default!;
 

@@ -49,11 +49,13 @@ public class KubernetesResource : ComponentResource
                         VnetSubnetID = virtualNetworkResource.SubnetId,
                     },
                 },
+                AutoUpgradeProfile = new ManagedClusterAutoUpgradeProfileArgs()
+                {
+                    UpgradeChannel = UpgradeChannel.Stable,
+                },
                 DnsPrefix = "AzureNativeprovider",
                 EnableRBAC = true,
                 Tags = configuration.GetTags(location),
-
-                // KubernetesVersion = "1.22.4", // You can only upgrade one minor version at a time.
                 NodeResourceGroup = $"{configuration.ApplicationName}-kubernetesnodes-{location}-{configuration.Environment}",
                 NetworkProfile = new ContainerServiceNetworkProfileArgs()
                 {

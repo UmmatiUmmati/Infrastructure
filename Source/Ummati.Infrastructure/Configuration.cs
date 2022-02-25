@@ -54,6 +54,18 @@ public class Configuration : IConfiguration
                 { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
             });
 
+    public UpgradeChannel KubernetesUpgradeChannel =>
+        this.Get(
+            nameof(this.KubernetesUpgradeChannel),
+            new Dictionary<string, UpgradeChannel>()
+            {
+                { nameof(UpgradeChannel.Node_image), UpgradeChannel.Node_image },
+                { nameof(UpgradeChannel.None), UpgradeChannel.None },
+                { nameof(UpgradeChannel.Patch), UpgradeChannel.Patch },
+                { nameof(UpgradeChannel.Rapid), UpgradeChannel.Rapid },
+                { nameof(UpgradeChannel.Stable), UpgradeChannel.Stable },
+            });
+
     public string KubernetesVmSize => this.GetString(nameof(this.KubernetesVmSize));
 
     public string ContainerImageName => this.GetString(nameof(this.ContainerImageName));

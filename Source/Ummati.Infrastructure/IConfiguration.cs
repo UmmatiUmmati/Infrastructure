@@ -66,6 +66,11 @@ public interface IConfiguration
     ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy { get; }
 
     /// <summary>
+    /// Gets the upgrade channel used to upgrade the cluster automatically.
+    /// </summary>
+    UpgradeChannel KubernetesUpgradeChannel { get; }
+
+    /// <summary>
     /// Gets the virtual machine size. DS3_v2 is the minimum recommended and DS4_v2 is recommended in production.
     /// </summary>
     string KubernetesVmSize { get; }
