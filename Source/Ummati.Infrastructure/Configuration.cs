@@ -102,9 +102,9 @@ public class Configuration : IConfiguration
 
     private static T GetFromMap<T>(string value, Dictionary<string, T> map)
     {
-        if (map.ContainsKey(value))
+        if (map.TryGetValue(value, out var result))
         {
-            return map[value];
+            return result;
         }
 
         throw new InvalidOperationException($"{typeof(T).Name} with value '{value}' not recognised.");
