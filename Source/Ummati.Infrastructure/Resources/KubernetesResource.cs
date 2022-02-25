@@ -33,6 +33,7 @@ public class KubernetesResource : ComponentResource
                     new ManagedClusterAgentPoolProfileArgs()
                     {
                         Count = configuration.KubernetesNodeCount,
+                        EnableAutoScaling = true,
                         MaxPods = configuration.KubernetesMaximumPods,
                         Mode = AgentPoolMode.System,
                         Name = "default",
