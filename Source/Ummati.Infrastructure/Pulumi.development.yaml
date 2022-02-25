@@ -23,8 +23,9 @@ config:
   ummati:KubernetesMaintenanceDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
   ummati:KubernetesMaintenanceHourSlots: ["1", "2"]
   ummati:KubernetesMaximumPods: "250"
+  ummati:KubernetesMaximumNodeCount: "2"
   ummati:KubernetesMaximumSurge: "33%"
-  ummati:KubernetesNodeCount: "1"
+  ummati:KubernetesMinimumNodeCount: "1"
   ummati:KubernetesOsDiskSizeGB: "30"
   ummati:KubernetesScaleSetEvictionPolicy: "Delete"
   ummati:KubernetesSKUTier: "Free"

@@ -15,9 +15,11 @@ public class TestConfiguration : IConfiguration
 
     public int KubernetesMaximumPods { get; set; } = default!;
 
+    public int KubernetesMaximumNodeCount { get; set; } = default!;
+
     public string KubernetesMaximumSurge { get; set; } = default!;
 
-    public int KubernetesNodeCount { get; set; } = default!;
+    public int KubernetesMinimumNodeCount { get; set; } = default!;
 
     public int KubernetesOsDiskSizeGB { get; set; } = default!;
 

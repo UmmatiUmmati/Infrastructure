@@ -39,9 +39,11 @@ public class Configuration : IConfiguration
 
     public int KubernetesMaximumPods => this.GetInteger(nameof(this.KubernetesMaximumPods), minimum: 1, maximum: 250);
 
+    public int KubernetesMaximumNodeCount => this.GetInteger(nameof(this.KubernetesMaximumNodeCount), minimum: 1, maximum: 100);
+
     public string KubernetesMaximumSurge => this.GetString(nameof(this.KubernetesMaximumSurge), pattern: @"^(\d+)(\%?)$");
 
-    public int KubernetesNodeCount => this.GetInteger(nameof(this.KubernetesNodeCount), minimum: 0, maximum: 100);
+    public int KubernetesMinimumNodeCount => this.GetInteger(nameof(this.KubernetesMinimumNodeCount), minimum: 0, maximum: 99);
 
     public int KubernetesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesOsDiskSizeGB), minimum: 1);
 

@@ -41,6 +41,11 @@ public interface IConfiguration
     int KubernetesMaximumPods { get; }
 
     /// <summary>
+    /// Gets the maximum number of nodes allowed in the cluster. Maximum is 100.
+    /// </summary>
+    int KubernetesMaximumNodeCount { get; }
+
+    /// <summary>
     /// Gets the maximum number of nodes to update at any one time. This can be a number e.g. 10 or a
     /// percentage e.g. 10%. 33% is recommended and you need enough IP addresses available on your subnet to support
     /// the extra nodes during the upgrade.
@@ -48,10 +53,10 @@ public interface IConfiguration
     string KubernetesMaximumSurge { get; }
 
     /// <summary>
-    /// Gets the number of nodes in the cluster. Minimum is zero and maximum is 100. A minimum of three is recommended
+    /// Gets the minimum number of nodes in the cluster. Minimum is zero. A minimum of three is recommended
     /// in production.
     /// </summary>
-    int KubernetesNodeCount { get; }
+    int KubernetesMinimumNodeCount { get; }
 
     /// <summary>
     /// Gets the size of the disk used by the nodes operating system.

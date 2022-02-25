@@ -2,6 +2,7 @@ namespace Ummati.Infrastructure.Resources;
 
 using System.Text;
 using Pulumi;
+using Pulumi.AzureNative.Compute;
 using Pulumi.AzureNative.ContainerService;
 using Pulumi.AzureNative.ContainerService.Inputs;
 using Pulumi.AzureNative.Resources;
@@ -23,6 +24,18 @@ public class KubernetesResource : ComponentResource
     {
         Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
 
+        var proximityPlacementGroup = new ProximityPlacementGroup(
+            $"proximityplacementgroup-{location}-{configuration.Environment}-",
+            new ProximityPlacementGroupArgs()
+            {
+                Location = location,
+
+                 // ProximityPlacementGroupName = "myProximityPlacementGroup",
+                 ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
+                ResourceGroupName = resourceGroup.Name,
+                Tags = configuration.GetTags(location),
+            });
+
         var managedCluster = new ManagedCluster(
             $"kubernetes-{location}-{configuration.Environment}-",
             new ManagedClusterArgs()
@@ -32,13 +45,16 @@ public class KubernetesResource : ComponentResource
                 {
                     new ManagedClusterAgentPoolProfileArgs()
                     {
-                        Count = configuration.KubernetesNodeCount,
                         EnableAutoScaling = true,
+                        MaxCount = configuration.KubernetesMaximumNodeCount,
                         MaxPods = configuration.KubernetesMaximumPods,
+                        MinCount = configuration.KubernetesMinimumNodeCount,
                         Mode = AgentPoolMode.System,
                         Name = "default",
                         OsDiskSizeGB = configuration.KubernetesOsDiskSizeGB,
+                        OsDiskType = OSDiskType.Ephemeral,
                         OsType = OSType.Linux,
+                        ProximityPlacementGroupID = proximityPlacementGroup.Id,
                         ScaleSetEvictionPolicy = configuration.KubernetesScaleSetEvictionPolicy,
                         Tags = configuration.GetTags(location),
                         Type = AgentPoolType.VirtualMachineScaleSets,
