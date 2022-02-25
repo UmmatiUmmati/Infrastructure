@@ -54,6 +54,15 @@ public class Configuration : IConfiguration
                 { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
             });
 
+    public ManagedClusterSKUTier KubernetesSKUTier =>
+        this.Get(
+            nameof(this.KubernetesSKUTier),
+            new Dictionary<string, ManagedClusterSKUTier>()
+            {
+                { nameof(ManagedClusterSKUTier.Free), ManagedClusterSKUTier.Free },
+                { nameof(ManagedClusterSKUTier.Paid), ManagedClusterSKUTier.Paid },
+            });
+
     public UpgradeChannel KubernetesUpgradeChannel =>
         this.Get(
             nameof(this.KubernetesUpgradeChannel),

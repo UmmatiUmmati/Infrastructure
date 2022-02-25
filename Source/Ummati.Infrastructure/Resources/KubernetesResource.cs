@@ -51,7 +51,7 @@ public class KubernetesResource : ComponentResource
                 },
                 AutoUpgradeProfile = new ManagedClusterAutoUpgradeProfileArgs()
                 {
-                    UpgradeChannel = UpgradeChannel.Stable,
+                    UpgradeChannel = configuration.KubernetesUpgradeChannel,
                 },
                 DnsPrefix = "AzureNativeprovider",
                 EnableRBAC = true,
@@ -68,6 +68,11 @@ public class KubernetesResource : ComponentResource
                 {
                     ClientId = identityResource.ClientId,
                     Secret = identityResource.ClientSecret,
+                },
+                Sku = new ManagedClusterSKUArgs()
+                {
+                    Name = ManagedClusterSKUName.Basic,
+                    Tier = configuration.KubernetesSKUTier,
                 },
 
                 // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()

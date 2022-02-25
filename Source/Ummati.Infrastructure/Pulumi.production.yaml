@@ -27,6 +27,7 @@ config:
   ummati:KubernetesNodeCount: "3"
   ummati:KubernetesOsDiskSizeGB: "30"
   ummati:KubernetesScaleSetEvictionPolicy: "Deallocate"
+  ummati:KubernetesSKUTier: "Paid"
   ummati:KubernetesUpgradeChannel: "Stable"
   ummati:KubernetesVmSize: "Standard_B2s"
 

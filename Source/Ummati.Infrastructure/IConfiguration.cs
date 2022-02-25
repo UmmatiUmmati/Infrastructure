@@ -66,6 +66,11 @@ public interface IConfiguration
     ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy { get; }
 
     /// <summary>
+    /// Gets the tier of the cluster SKU. The Paid tier results in higher availability.
+    /// </summary>
+    ManagedClusterSKUTier KubernetesSKUTier { get; }
+
+    /// <summary>
     /// Gets the upgrade channel used to upgrade the cluster automatically.
     /// </summary>
     UpgradeChannel KubernetesUpgradeChannel { get; }

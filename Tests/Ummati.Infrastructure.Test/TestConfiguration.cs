@@ -27,6 +27,8 @@ public class TestConfiguration : IConfiguration
 
     public IEnumerable<int> KubernetesMaintenanceHourSlots { get; set; } = default!;
 
+    public ManagedClusterSKUTier KubernetesSKUTier { get; set; } = default!;
+
     public UpgradeChannel KubernetesUpgradeChannel { get; set; } = default!;
 
     public string KubernetesVmSize { get; set; } = default!;
