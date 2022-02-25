@@ -30,8 +30,8 @@ public class KubernetesResource : ComponentResource
             {
                 Location = location,
 
-                 // ProximityPlacementGroupName = "myProximityPlacementGroup",
-                 ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
+                // ProximityPlacementGroupName = "myProximityPlacementGroup",
+                ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
                 ResourceGroupName = resourceGroup.Name,
                 Tags = configuration.GetTags(location),
             });
