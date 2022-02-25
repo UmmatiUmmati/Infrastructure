@@ -73,7 +73,6 @@ Task("UpdateServicePrincipal")
         var subscriptionId = GetSubscriptionId();
         DeleteServicePrincipal(servicePrincipalName);
         var (objectId, clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName, subscriptionId);
-        CreateRoleAssignment(subscriptionId, objectId, "Managed Application Contributor Role");
 
         Information($"ObjectId: {objectId}");
         Information($"ClientId: {clientId}");
@@ -172,22 +171,6 @@ void DeleteServicePrincipal(string name)
     var objectId = servicePrincipal.GetProperty("appId").GetString();
 
     return (objectId, clientId, clientSecret, tenantId);
-}
-
-void CreateRoleAssignment(string subscriptionId, string objectId, string role)
-{
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("role")
-                .Append("assignment")
-                .Append("create")
-                .AppendSwitchQuoted("--assignee", objectId)
-                .AppendSwitch("--role", $"'{role}'")
-                .AppendSwitchQuoted("--subscription", subscriptionId)));
-
 }
 
 void SetPulumiConfig(string key, string value, bool secret = false)
