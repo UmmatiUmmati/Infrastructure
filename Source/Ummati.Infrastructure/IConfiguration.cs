@@ -81,12 +81,4 @@ public interface IConfiguration
     int ContainerMinReplicas { get; }
 
     int ContainerConcurrentRequests { get; }
-
-    string GetAzureActiveDirectoryDescription();
-
-#pragma warning disable CA1002 // Do not expose generic lists
-    List<string> GetAzureActiveDirecoryTags();
-#pragma warning restore CA1002 // Do not expose generic lists
-
-    Dictionary<string, string> GetTags(string location);
 }

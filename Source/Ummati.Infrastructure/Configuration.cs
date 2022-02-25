@@ -2,6 +2,7 @@ namespace Ummati.Infrastructure;
 
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Pulumi;
 using Pulumi.AzureNative.ContainerService;
 
@@ -38,7 +39,7 @@ public class Configuration : IConfiguration
 
     public int KubernetesMaximumPods => this.GetInteger(nameof(this.KubernetesMaximumPods), minimum: 1, maximum: 250);
 
-    public string KubernetesMaximumSurge => this.GetString(nameof(this.KubernetesMaximumSurge));
+    public string KubernetesMaximumSurge => this.GetString(nameof(this.KubernetesMaximumSurge), pattern: @"^(\d+)(\%?)$");
 
     public int KubernetesNodeCount => this.GetInteger(nameof(this.KubernetesNodeCount), minimum: 0, maximum: 100);
 
@@ -67,20 +68,6 @@ public class Configuration : IConfiguration
 
     public int ContainerConcurrentRequests => this.GetInteger(nameof(this.ContainerConcurrentRequests));
 
-    public string GetAzureActiveDirectoryDescription() =>
-        string.Join(System.Environment.NewLine, this.GetAzureActiveDirecoryTags());
-
-    public List<string> GetAzureActiveDirecoryTags() =>
-        this.GetTags("Azure Active Directory").Select(x => $"{x.Key}={x.Value}").ToList();
-
-    public Dictionary<string, string> GetTags(string location) =>
-        new()
-        {
-            { TagName.Application, this.ApplicationName },
-            { TagName.Environment, this.Environment },
-            { TagName.Location, location },
-        };
-
     private static T GetFromMap<T>(string value, Dictionary<string, T> map)
     {
         if (map.ContainsKey(value))
@@ -91,19 +78,24 @@ public class Configuration : IConfiguration
         throw new InvalidOperationException($"{typeof(T).Name} with value '{value}' not recognised.");
     }
 
+    private static void AssertIsBetween<T>(string key, T value, T? minimum = null, T? maximum = null)
+        where T : struct, IComparable<T>
+    {
+        if (minimum.HasValue && value.CompareTo(minimum.Value) < 0)
+        {
+            throw new InvalidOperationException($"{key} with value '{value}' must be more than {minimum}");
+        }
+
+        if (maximum.HasValue && value.CompareTo(maximum.Value) > 0)
+        {
+            throw new InvalidOperationException($"{key} with value '{value}' must be less than {maximum}");
+        }
+    }
+
     private double GetDouble(string key, double? minimum = null, double? maximum = null)
     {
         var value = double.Parse(this.config.Require(key), CultureInfo.InvariantCulture);
-        if (minimum.HasValue && value < minimum)
-        {
-            throw new InvalidOperationException($"{key} must be more than {minimum}");
-        }
-
-        if (maximum.HasValue && value > maximum)
-        {
-            throw new InvalidOperationException($"{key} must be les than {maximum}");
-        }
-
+        AssertIsBetween(key, value, minimum, maximum);
         return value;
     }
 
@@ -123,7 +115,21 @@ public class Configuration : IConfiguration
         return value;
     }
 
-    private string GetString(string key) => this.config.Require(key);
+    private string GetString(string key, string? pattern = null)
+    {
+        var value = this.config.Require(key);
+
+        if (!string.IsNullOrWhiteSpace(pattern))
+        {
+            if (!Regex.IsMatch(value, pattern))
+            {
+                throw new InvalidOperationException(
+                    $"{key} with value '{value}' must match the pattern {pattern}.");
+            }
+        }
+
+        return value;
+    }
 
     private IEnumerable<string> GetStringCollection(string key) =>
         this.config
@@ -136,16 +142,7 @@ public class Configuration : IConfiguration
         this.GetStringCollection(key).Select(x =>
         {
             var value = int.Parse(x, CultureInfo.InvariantCulture);
-            if (minimum.HasValue && value < minimum)
-            {
-                throw new InvalidOperationException($"{key} must be more than {minimum}");
-            }
-
-            if (maximum.HasValue && value > maximum)
-            {
-                throw new InvalidOperationException($"{key} must be les than {maximum}");
-            }
-
+            AssertIsBetween(key, value, minimum, maximum);
             return value;
         });
 
