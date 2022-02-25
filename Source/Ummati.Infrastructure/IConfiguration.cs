@@ -64,6 +64,12 @@ public interface IConfiguration
     int KubernetesOsDiskSizeGB { get; }
 
     /// <summary>
+    /// Gets the type of the disk used by the nodes. Ephemeral is cheaper and faster but requires a VM size which
+    /// supports 32GB of temporary storage.
+    /// </summary>
+    OSDiskType KubernetesOSDiskType { get; }
+
+    /// <summary>
     /// Gets the policy used to scale down the number of nodes.
     /// Delete (Default) - Stops nodes when scaling down. This is faster to scale up.
     /// Deallocate - Stops and deletes nodes when scaling down. This is cheaper.

@@ -47,6 +47,15 @@ public class Configuration : IConfiguration
 
     public int KubernetesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesOsDiskSizeGB), minimum: 1);
 
+    public OSDiskType KubernetesOSDiskType =>
+        this.Get(
+            nameof(this.KubernetesOSDiskType),
+            new Dictionary<string, OSDiskType>()
+            {
+                { nameof(OSDiskType.Ephemeral), OSDiskType.Ephemeral },
+                { nameof(OSDiskType.Managed), OSDiskType.Managed },
+            });
+
     public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy =>
         this.Get(
             nameof(this.KubernetesScaleSetEvictionPolicy),

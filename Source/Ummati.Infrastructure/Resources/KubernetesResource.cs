@@ -52,7 +52,7 @@ public class KubernetesResource : ComponentResource
                         Mode = AgentPoolMode.System,
                         Name = "default",
                         OsDiskSizeGB = configuration.KubernetesOsDiskSizeGB,
-                        OsDiskType = OSDiskType.Ephemeral,
+                        OsDiskType = configuration.KubernetesOSDiskType,
                         OsType = OSType.Linux,
                         ProximityPlacementGroupID = proximityPlacementGroup.Id,
                         ScaleSetEvictionPolicy = configuration.KubernetesScaleSetEvictionPolicy,

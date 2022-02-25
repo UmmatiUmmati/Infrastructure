@@ -23,6 +23,8 @@ public class TestConfiguration : IConfiguration
 
     public int KubernetesOsDiskSizeGB { get; set; } = default!;
 
+    public OSDiskType KubernetesOSDiskType { get; set; } = default!;
+
     public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy { get; set; } = default!;
 
     public IEnumerable<WeekDay> KubernetesMaintenanceDays { get; set; } = default!;
