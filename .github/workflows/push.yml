@@ -26,9 +26,9 @@ jobs:
           - development
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3.0.0
       - name: "Install .NET SDK"
-        uses: actions/setup-dotnet@v1.9.0
+        uses: actions/setup-dotnet@v2.0.0
       - name: "Dotnet Tool Restore"
         run: dotnet tool restore
         shell: pwsh
@@ -39,7 +39,7 @@ jobs:
         run: dotnet cake --target=Test
         shell: pwsh
       - name: "Pulumi Up"
-        uses: pulumi/actions@v3.12.1
+        uses: pulumi/actions@v3.15.0
         with:
           command: up
           stack-name: ${{matrix.environment}}
