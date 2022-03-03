@@ -29,9 +29,9 @@ config:
   ummati:KubernetesOsDiskSizeGB: "100"
   ummati:KubernetesOSDiskType: "Ephemeral"
   ummati:KubernetesScaleSetEvictionPolicy: "Deallocate"
+  ummati:KubernetesVmSize: "Standard_D2ads_v5"
   ummati:KubernetesSKUTier: "Paid"
   ummati:KubernetesUpgradeChannel: "Stable"
-  ummati:KubernetesVmSize: "Standard_B2s"
 
   ummati:ContainerConcurrentRequests: "50"
   ummati:ContainerCpu: "0.25"
