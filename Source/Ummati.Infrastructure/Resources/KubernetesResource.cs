@@ -50,8 +50,14 @@ public class KubernetesResource : ComponentResource
                         MinCount = configuration.KubernetesMinimumNodeCount,
                         Mode = AgentPoolMode.System,
                         Name = "default",
+                        NodeLabels = new Dictionary<string, string>()
+                        {
+                            { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
+                            { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
+                        },
                         OsDiskSizeGB = configuration.KubernetesOsDiskSizeGB,
                         OsDiskType = configuration.KubernetesOSDiskType,
+                        OsSKU = OSSKU.Ubuntu,
                         OsType = OSType.Linux,
                         ProximityPlacementGroupID = proximityPlacementGroup.Id,
                         ScaleSetEvictionPolicy = configuration.KubernetesScaleSetEvictionPolicy,
