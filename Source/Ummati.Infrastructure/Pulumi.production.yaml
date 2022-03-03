@@ -22,16 +22,28 @@ config:
 
   ummati:KubernetesMaintenanceDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
   ummati:KubernetesMaintenanceHourSlots: ["1", "2"]
-  ummati:KubernetesMaximumPods: "250"
-  ummati:KubernetesMaximumNodeCount: "6"
-  ummati:KubernetesMaximumSurge: "33%"
-  ummati:KubernetesMinimumNodeCount: "3"
-  ummati:KubernetesOsDiskSizeGB: "100"
-  ummati:KubernetesOSDiskType: "Ephemeral"
-  ummati:KubernetesScaleSetEvictionPolicy: "Deallocate"
-  ummati:KubernetesVmSize: "Standard_D2ads_v5"
   ummati:KubernetesSKUTier: "Paid"
   ummati:KubernetesUpgradeChannel: "Stable"
+
+  ummati:KubernetesSystemNodesAvailabilityZones: ["1", "2", "3"]
+  ummati:KubernetesSystemNodesMaximumPods: "30"
+  ummati:KubernetesSystemNodesMaximumNodeCount: "5"
+  ummati:KubernetesSystemNodesMaximumSurge: "33%"
+  ummati:KubernetesSystemNodesMinimumNodeCount: "3"
+  ummati:KubernetesSystemNodesOsDiskSizeGB: "100"
+  ummati:KubernetesSystemNodesOSDiskType: "Ephemeral"
+  ummati:KubernetesSystemNodesScaleSetEvictionPolicy: "Deallocate"
+  ummati:KubernetesSystemNodesVmSize: "Standard_D2ads_v5"
+
+  ummati:KubernetesUserNodesAvailabilityZones: ["1", "2", "3"]
+  ummati:KubernetesUserNodesMaximumPods: "250"
+  ummati:KubernetesUserNodesMaximumNodeCount: "3"
+  ummati:KubernetesUserNodesMaximumSurge: "33%"
+  ummati:KubernetesUserNodesMinimumNodeCount: "0"
+  ummati:KubernetesUserNodesOsDiskSizeGB: "100"
+  ummati:KubernetesUserNodesOSDiskType: "Ephemeral"
+  ummati:KubernetesUserNodesScaleSetEvictionPolicy: "Deallocate"
+  ummati:KubernetesUserNodesVmSize: "Standard_D2ads_v5"
 
   ummati:ContainerConcurrentRequests: "50"
   ummati:ContainerCpu: "0.25"

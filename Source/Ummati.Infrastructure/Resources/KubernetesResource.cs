@@ -24,53 +24,94 @@ public class KubernetesResource : ComponentResource
     {
         Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
 
-        var proximityPlacementGroup = new ProximityPlacementGroup(
-            $"proximityplacementgroup-{location}-{configuration.Environment}-",
-            new ProximityPlacementGroupArgs()
+        var nodePoolProfiles = new List<ManagedClusterAgentPoolProfileArgs>
+        {
+            new ManagedClusterAgentPoolProfileArgs()
             {
-                Location = location,
-                ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
-                ResourceGroupName = resourceGroup.Name,
+                AvailabilityZones = configuration.KubernetesSystemNodesAvailabilityZones.ToList(),
+                Count = configuration.KubernetesSystemNodesMinimumNodeCount,
+                EnableAutoScaling = true,
+                MaxCount = configuration.KubernetesSystemNodesMaximumNodeCount,
+                MaxPods = configuration.KubernetesSystemNodesMaximumPods,
+                MinCount = configuration.KubernetesSystemNodesMinimumNodeCount,
+                Mode = AgentPoolMode.System,
+                Name = "system",
+                NodeLabels = new Dictionary<string, string>()
+                {
+                    { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
+                    { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
+                },
+                NodeTaints = new List<string>()
+                {
+                    { "CriticalAddonsOnly=true:NoSchedule" },
+                },
+                OsDiskSizeGB = configuration.KubernetesSystemNodesOsDiskSizeGB,
+                OsDiskType = configuration.KubernetesSystemNodesOSDiskType,
+                OsSKU = OSSKU.Ubuntu,
+                OsType = OSType.Linux,
+                ScaleSetEvictionPolicy = configuration.KubernetesSystemNodesScaleSetEvictionPolicy,
                 Tags = configuration.GetTags(location),
-            });
+                Type = AgentPoolType.VirtualMachineScaleSets,
+                UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
+                {
+                    MaxSurge = configuration.KubernetesSystemNodesMaximumSurge,
+                },
+                VmSize = configuration.KubernetesSystemNodesVmSize,
+                VnetSubnetID = virtualNetworkResource.SubnetId,
+            },
+        };
+
+        foreach (var availabilityZone in configuration.KubernetesUserNodesAvailabilityZones)
+        {
+            var proximityPlacementGroup = new ProximityPlacementGroup(
+                $"proximityplacementgroup{availabilityZone}-{location}-{configuration.Environment}-",
+                new ProximityPlacementGroupArgs()
+                {
+                    Location = location,
+                    ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
+                    ResourceGroupName = resourceGroup.Name,
+                    Tags = configuration.GetTags(location),
+                });
+
+            nodePoolProfiles.Add(
+                new ManagedClusterAgentPoolProfileArgs()
+                {
+                    AvailabilityZones = availabilityZone,
+                    Count = configuration.KubernetesUserNodesMinimumNodeCount,
+                    EnableAutoScaling = true,
+                    MaxCount = configuration.KubernetesUserNodesMaximumNodeCount,
+                    MaxPods = configuration.KubernetesUserNodesMaximumPods,
+                    MinCount = configuration.KubernetesUserNodesMinimumNodeCount,
+                    Mode = AgentPoolMode.User,
+                    Name = $"user{availabilityZone}",
+                    NodeLabels = new Dictionary<string, string>()
+                    {
+                        { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
+                        { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
+                    },
+                    OsDiskSizeGB = configuration.KubernetesUserNodesOsDiskSizeGB,
+                    OsDiskType = configuration.KubernetesUserNodesOSDiskType,
+                    OsSKU = OSSKU.Ubuntu,
+                    OsType = OSType.Linux,
+                    ProximityPlacementGroupID = proximityPlacementGroup.Id,
+                    ScaleSetEvictionPolicy = configuration.KubernetesUserNodesScaleSetEvictionPolicy,
+                    Tags = configuration.GetTags(location),
+                    Type = AgentPoolType.VirtualMachineScaleSets,
+                    UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
+                    {
+                        MaxSurge = configuration.KubernetesUserNodesMaximumSurge,
+                    },
+                    VmSize = configuration.KubernetesUserNodesVmSize,
+                    VnetSubnetID = virtualNetworkResource.SubnetId,
+                });
+        }
 
         var managedCluster = new ManagedCluster(
             $"kubernetes-{location}-{configuration.Environment}-",
             new ManagedClusterArgs()
             {
                 ResourceGroupName = resourceGroup.Name,
-                AgentPoolProfiles = new InputList<ManagedClusterAgentPoolProfileArgs>()
-                {
-                    new ManagedClusterAgentPoolProfileArgs()
-                    {
-                        Count = configuration.KubernetesMinimumNodeCount,
-                        EnableAutoScaling = true,
-                        MaxCount = configuration.KubernetesMaximumNodeCount,
-                        MaxPods = configuration.KubernetesMaximumPods,
-                        MinCount = configuration.KubernetesMinimumNodeCount,
-                        Mode = AgentPoolMode.System,
-                        Name = "default",
-                        NodeLabels = new Dictionary<string, string>()
-                        {
-                            { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
-                            { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
-                        },
-                        OsDiskSizeGB = configuration.KubernetesOsDiskSizeGB,
-                        OsDiskType = configuration.KubernetesOSDiskType,
-                        OsSKU = OSSKU.Ubuntu,
-                        OsType = OSType.Linux,
-                        ProximityPlacementGroupID = proximityPlacementGroup.Id,
-                        ScaleSetEvictionPolicy = configuration.KubernetesScaleSetEvictionPolicy,
-                        Tags = configuration.GetTags(location),
-                        Type = AgentPoolType.VirtualMachineScaleSets,
-                        UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
-                        {
-                            MaxSurge = configuration.KubernetesMaximumSurge,
-                        },
-                        VmSize = configuration.KubernetesVmSize,
-                        VnetSubnetID = virtualNetworkResource.SubnetId,
-                    },
-                },
+                AgentPoolProfiles = nodePoolProfiles,
                 AutoUpgradeProfile = new ManagedClusterAutoUpgradeProfileArgs()
                 {
                     UpgradeChannel = configuration.KubernetesUpgradeChannel,
@@ -85,6 +126,7 @@ public class KubernetesResource : ComponentResource
                     DnsServiceIP = "10.0.2.254",
                     ServiceCidr = "10.0.2.0/24",
                     DockerBridgeCidr = "172.17.0.1/16",
+                    LoadBalancerSku = LoadBalancerSku.Standard,
                 },
                 ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs
                 {

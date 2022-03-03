@@ -37,34 +37,6 @@ public class Configuration : IConfiguration
     public IEnumerable<int> KubernetesMaintenanceHourSlots =>
         this.GetIntegerCollection(nameof(this.KubernetesMaintenanceHourSlots), minimum: 0, maximum: 24);
 
-    public int KubernetesMaximumPods => this.GetInteger(nameof(this.KubernetesMaximumPods), minimum: 1, maximum: 250);
-
-    public int KubernetesMaximumNodeCount => this.GetInteger(nameof(this.KubernetesMaximumNodeCount), minimum: 1, maximum: 100);
-
-    public string KubernetesMaximumSurge => this.GetString(nameof(this.KubernetesMaximumSurge), pattern: @"^(\d+)(\%?)$");
-
-    public int KubernetesMinimumNodeCount => this.GetInteger(nameof(this.KubernetesMinimumNodeCount), minimum: 0, maximum: 99);
-
-    public int KubernetesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesOsDiskSizeGB), minimum: 1);
-
-    public OSDiskType KubernetesOSDiskType =>
-        this.Get(
-            nameof(this.KubernetesOSDiskType),
-            new Dictionary<string, OSDiskType>()
-            {
-                { nameof(OSDiskType.Ephemeral), OSDiskType.Ephemeral },
-                { nameof(OSDiskType.Managed), OSDiskType.Managed },
-            });
-
-    public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy =>
-        this.Get(
-            nameof(this.KubernetesScaleSetEvictionPolicy),
-            new Dictionary<string, ScaleSetEvictionPolicy>()
-            {
-                { nameof(ScaleSetEvictionPolicy.Delete), ScaleSetEvictionPolicy.Delete },
-                { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
-            });
-
     public ManagedClusterSKUTier KubernetesSKUTier =>
         this.Get(
             nameof(this.KubernetesSKUTier),
@@ -86,7 +58,73 @@ public class Configuration : IConfiguration
                 { nameof(UpgradeChannel.Stable), UpgradeChannel.Stable },
             });
 
-    public string KubernetesVmSize => this.GetString(nameof(this.KubernetesVmSize));
+    public IEnumerable<string> KubernetesSystemNodesAvailabilityZones =>
+        this.GetIntegerCollection(nameof(this.KubernetesSystemNodesAvailabilityZones), minimum: 0, maximum: 3)
+        .Select(x => x.ToString(CultureInfo.InvariantCulture));
+
+    public int KubernetesSystemNodesMaximumPods => this.GetInteger(nameof(this.KubernetesSystemNodesMaximumPods), minimum: 1, maximum: 250);
+
+    public int KubernetesSystemNodesMaximumNodeCount => this.GetInteger(nameof(this.KubernetesSystemNodesMaximumNodeCount), minimum: 1, maximum: 100);
+
+    public string KubernetesSystemNodesMaximumSurge => this.GetString(nameof(this.KubernetesSystemNodesMaximumSurge), pattern: @"^(\d+)(\%?)$");
+
+    public int KubernetesSystemNodesMinimumNodeCount => this.GetInteger(nameof(this.KubernetesSystemNodesMinimumNodeCount), minimum: 0, maximum: 99);
+
+    public int KubernetesSystemNodesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesSystemNodesOsDiskSizeGB), minimum: 1);
+
+    public OSDiskType KubernetesSystemNodesOSDiskType =>
+        this.Get(
+            nameof(this.KubernetesSystemNodesOSDiskType),
+            new Dictionary<string, OSDiskType>()
+            {
+                { nameof(OSDiskType.Ephemeral), OSDiskType.Ephemeral },
+                { nameof(OSDiskType.Managed), OSDiskType.Managed },
+            });
+
+    public ScaleSetEvictionPolicy KubernetesSystemNodesScaleSetEvictionPolicy =>
+        this.Get(
+            nameof(this.KubernetesSystemNodesScaleSetEvictionPolicy),
+            new Dictionary<string, ScaleSetEvictionPolicy>()
+            {
+                { nameof(ScaleSetEvictionPolicy.Delete), ScaleSetEvictionPolicy.Delete },
+                { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
+            });
+
+    public string KubernetesSystemNodesVmSize => this.GetString(nameof(this.KubernetesSystemNodesVmSize));
+
+    public IEnumerable<string> KubernetesUserNodesAvailabilityZones =>
+        this.GetIntegerCollection(nameof(this.KubernetesUserNodesAvailabilityZones), minimum: 0, maximum: 3)
+        .Select(x => x.ToString(CultureInfo.InvariantCulture));
+
+    public int KubernetesUserNodesMaximumPods => this.GetInteger(nameof(this.KubernetesUserNodesMaximumPods), minimum: 1, maximum: 250);
+
+    public int KubernetesUserNodesMaximumNodeCount => this.GetInteger(nameof(this.KubernetesUserNodesMaximumNodeCount), minimum: 1, maximum: 100);
+
+    public string KubernetesUserNodesMaximumSurge => this.GetString(nameof(this.KubernetesUserNodesMaximumSurge), pattern: @"^(\d+)(\%?)$");
+
+    public int KubernetesUserNodesMinimumNodeCount => this.GetInteger(nameof(this.KubernetesUserNodesMinimumNodeCount), minimum: 0, maximum: 99);
+
+    public int KubernetesUserNodesOsDiskSizeGB => this.GetInteger(nameof(this.KubernetesUserNodesOsDiskSizeGB), minimum: 1);
+
+    public OSDiskType KubernetesUserNodesOSDiskType =>
+        this.Get(
+            nameof(this.KubernetesUserNodesOSDiskType),
+            new Dictionary<string, OSDiskType>()
+            {
+                { nameof(OSDiskType.Ephemeral), OSDiskType.Ephemeral },
+                { nameof(OSDiskType.Managed), OSDiskType.Managed },
+            });
+
+    public ScaleSetEvictionPolicy KubernetesUserNodesScaleSetEvictionPolicy =>
+        this.Get(
+            nameof(this.KubernetesUserNodesScaleSetEvictionPolicy),
+            new Dictionary<string, ScaleSetEvictionPolicy>()
+            {
+                { nameof(ScaleSetEvictionPolicy.Delete), ScaleSetEvictionPolicy.Delete },
+                { nameof(ScaleSetEvictionPolicy.Deallocate), ScaleSetEvictionPolicy.Deallocate },
+            });
+
+    public string KubernetesUserNodesVmSize => this.GetString(nameof(this.KubernetesUserNodesVmSize));
 
     public string ContainerImageName => this.GetString(nameof(this.ContainerImageName));
 

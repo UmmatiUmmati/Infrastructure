@@ -13,20 +13,6 @@ public class TestConfiguration : IConfiguration
 
     public IEnumerable<string> Locations { get; init; } = default!;
 
-    public int KubernetesMaximumPods { get; set; } = default!;
-
-    public int KubernetesMaximumNodeCount { get; set; } = default!;
-
-    public string KubernetesMaximumSurge { get; set; } = default!;
-
-    public int KubernetesMinimumNodeCount { get; set; } = default!;
-
-    public int KubernetesOsDiskSizeGB { get; set; } = default!;
-
-    public OSDiskType KubernetesOSDiskType { get; set; } = default!;
-
-    public ScaleSetEvictionPolicy KubernetesScaleSetEvictionPolicy { get; set; } = default!;
-
     public IEnumerable<WeekDay> KubernetesMaintenanceDays { get; set; } = default!;
 
     public IEnumerable<int> KubernetesMaintenanceHourSlots { get; set; } = default!;
@@ -35,7 +21,41 @@ public class TestConfiguration : IConfiguration
 
     public UpgradeChannel KubernetesUpgradeChannel { get; set; } = default!;
 
-    public string KubernetesVmSize { get; set; } = default!;
+    public IEnumerable<string> KubernetesSystemNodesAvailabilityZones { get; set; } = default!;
+
+    public int KubernetesSystemNodesMaximumPods { get; set; } = default!;
+
+    public int KubernetesSystemNodesMaximumNodeCount { get; set; } = default!;
+
+    public string KubernetesSystemNodesMaximumSurge { get; set; } = default!;
+
+    public int KubernetesSystemNodesMinimumNodeCount { get; set; } = default!;
+
+    public int KubernetesSystemNodesOsDiskSizeGB { get; set; } = default!;
+
+    public OSDiskType KubernetesSystemNodesOSDiskType { get; set; } = default!;
+
+    public ScaleSetEvictionPolicy KubernetesSystemNodesScaleSetEvictionPolicy { get; set; } = default!;
+
+    public string KubernetesSystemNodesVmSize { get; set; } = default!;
+
+    public IEnumerable<string> KubernetesUserNodesAvailabilityZones { get; set; } = default!;
+
+    public int KubernetesUserNodesMaximumPods { get; set; } = default!;
+
+    public int KubernetesUserNodesMaximumNodeCount { get; set; } = default!;
+
+    public string KubernetesUserNodesMaximumSurge { get; set; } = default!;
+
+    public int KubernetesUserNodesMinimumNodeCount { get; set; } = default!;
+
+    public int KubernetesUserNodesOsDiskSizeGB { get; set; } = default!;
+
+    public OSDiskType KubernetesUserNodesOSDiskType { get; set; } = default!;
+
+    public ScaleSetEvictionPolicy KubernetesUserNodesScaleSetEvictionPolicy { get; set; } = default!;
+
+    public string KubernetesUserNodesVmSize { get; set; } = default!;
 
     public string ContainerImageName { get; init; } = default!;
 

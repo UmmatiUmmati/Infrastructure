@@ -39,7 +39,7 @@ public class VirtualNetworkResource : ComponentResource
             $"subnet-{location}-{configuration.Environment}",
             new Pulumi.AzureNative.Network.SubnetArgs()
             {
-                AddressPrefix = $"10.0.0.0/23",
+                AddressPrefix = $"10.0.0.0/16",
                 ResourceGroupName = resourceGroup.Name,
                 VirtualNetworkName = virtualNetwork.Name,
             });
