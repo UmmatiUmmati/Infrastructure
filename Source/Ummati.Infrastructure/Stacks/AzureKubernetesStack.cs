@@ -3,6 +3,7 @@ namespace Ummati.Infrastructure.Stacks;
 using System.Collections.Immutable;
 using Pulumi;
 using Pulumi.AzureNative.Resources;
+using Ummati.Infrastructure.Configuration;
 using Ummati.Infrastructure.Resources;
 
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
@@ -39,16 +40,16 @@ public class AzureKubernetesStack : Stack
                 location,
                 resourceGroup);
 
-            var kubernetesResource = new KubernetesResource(
-                $"virtualnetwork-{location}-{Configuration.Environment}-",
-                Configuration,
-                location,
-                resourceGroup,
-                commonResource,
-                identityResource,
-                virtualNetworkResource);
+            // var kubernetesResource = new KubernetesResource(
+            //     $"virtualnetwork-{location}-{Configuration.Environment}-",
+            //     Configuration,
+            //     location,
+            //     resourceGroup,
+            //     commonResource,
+            //     identityResource,
+            //     virtualNetworkResource);
 
-            outputs.Add(kubernetesResource.KubeConfig);
+            // outputs.Add(kubernetesResource.KubeConfig);
         }
 
         this.KubeConfigs = Output.All(outputs.Select(x => x));

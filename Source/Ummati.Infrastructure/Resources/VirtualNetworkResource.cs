@@ -5,6 +5,7 @@ using Pulumi;
 using Pulumi.AzureNative.Network;
 using Pulumi.AzureNative.Network.Inputs;
 using Pulumi.AzureNative.Resources;
+using Ummati.Infrastructure.Configuration;
 
 public class VirtualNetworkResource : ComponentResource
 {

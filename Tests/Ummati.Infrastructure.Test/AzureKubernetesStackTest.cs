@@ -9,18 +9,12 @@ using Xunit;
 public class AzureKubernetesStackTest
 {
     [Fact]
-    public async Task AllResourcesHaveTagsAsync()
+    public async Task AllAzureActiveDirectoryResourcesHaveTagsAsync()
     {
         AzureKubernetesStack.Configuration = new TestConfiguration()
         {
             ApplicationName = "test-app",
             CommonLocation = "northeurope",
-            ContainerImageName = "image-name",
-            ContainerCpu = 1,
-            ContainerMemory = "0.5Gi",
-            ContainerMaxReplicas = 10,
-            ContainerMinReplicas = 1,
-            ContainerConcurrentRequests = 10,
             Environment = "test",
             Locations = ImmutableArray.Create("northeurope", "canadacentral"),
         };
@@ -29,7 +23,37 @@ public class AzureKubernetesStackTest
 
         foreach (var resource in resources)
         {
-            var tagsOutput = GetTags(resource);
+            var tagsOutput = GetAzureActiveDirectoryTags(resource);
+            if (tagsOutput is not null)
+            {
+                var tags = await OutputUtilities.GetValueAsync(tagsOutput).ConfigureAwait(false);
+
+                Assert.NotNull(tags);
+                Assert.Equal($"{TagName.Application}=test-app", tags![0]);
+                Assert.Equal($"{TagName.Environment}=test", tags![1]);
+                var location = tags![2];
+                Assert.True(string.Equals($"{TagName.Location}=northeurope", location, StringComparison.Ordinal) ||
+                    string.Equals($"{TagName.Location}=canadacentral", location, StringComparison.Ordinal));
+            }
+        }
+    }
+
+    [Fact]
+    public async Task AllAzureResourcesHaveTagsAsync()
+    {
+        AzureKubernetesStack.Configuration = new TestConfiguration()
+        {
+            ApplicationName = "test-app",
+            CommonLocation = "northeurope",
+            Environment = "test",
+            Locations = ImmutableArray.Create("northeurope", "canadacentral"),
+        };
+
+        var resources = await Testing.RunAsync<AzureKubernetesStack>().ConfigureAwait(false);
+
+        foreach (var resource in resources)
+        {
+            var tagsOutput = GetAzureTags(resource);
             if (tagsOutput is not null)
             {
                 var tags = await OutputUtilities.GetValueAsync(tagsOutput).ConfigureAwait(false);
@@ -44,7 +68,18 @@ public class AzureKubernetesStackTest
         }
     }
 
-    private static Output<ImmutableDictionary<string, string>?>? GetTags(Resource resource)
+    private static Output<ImmutableList<string>?>? GetAzureActiveDirectoryTags(Resource resource)
+    {
+        var tagsProperty = resource.GetType().GetProperty("Tags");
+        if (tagsProperty?.PropertyType == typeof(Output<ImmutableList<string>?>))
+        {
+            return (Output<ImmutableList<string>?>?)tagsProperty.GetValue(resource);
+        }
+
+        return null;
+    }
+
+    private static Output<ImmutableDictionary<string, string>?>? GetAzureTags(Resource resource)
     {
         var tagsProperty = resource.GetType().GetProperty("Tags");
         if (tagsProperty?.PropertyType == typeof(Output<ImmutableDictionary<string, string>?>))

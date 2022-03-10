@@ -45,6 +45,15 @@ config:
   ummati:KubernetesUserNodesScaleSetEvictionPolicy: "Deallocate"
   ummati:KubernetesUserNodesVmSize: "Standard_D2ads_v5"
 
+  # ummati:KubernetesSpotNodesMaximumPods: "250"
+  # ummati:KubernetesSpotNodesMaximumNodeCount: "3"
+  # ummati:KubernetesSpotNodesMaximumSurge: "33%"
+  # ummati:KubernetesSpotNodesMinimumNodeCount: "0"
+  # ummati:KubernetesSpotNodesOsDiskSizeGB: "100"
+  # ummati:KubernetesSpotNodesOSDiskType: "Ephemeral"
+  # ummati:KubernetesSpotNodesScaleSetEvictionPolicy: "Deallocate"
+  # ummati:KubernetesSpotNodesVmSize: "Standard_D2ads_v5"
+
   ummati:ContainerConcurrentRequests: "50"
   ummati:ContainerCpu: "0.25"
   ummati:ContainerImageName: muhammadrehansaeed/api:0.0.0-preview.0

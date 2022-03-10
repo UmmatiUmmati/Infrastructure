@@ -1,11 +1,13 @@
 namespace Ummati.Infrastructure.Resources;
 
+using System.Globalization;
 using System.Text;
 using Pulumi;
 using Pulumi.AzureNative.Compute;
 using Pulumi.AzureNative.ContainerService;
 using Pulumi.AzureNative.ContainerService.Inputs;
 using Pulumi.AzureNative.Resources;
+using Ummati.Infrastructure.Configuration;
 
 public class KubernetesResource : ComponentResource
 {
@@ -19,91 +21,27 @@ public class KubernetesResource : ComponentResource
         VirtualNetworkResource virtualNetworkResource,
         ComponentResourceOptions? options = null)
 #pragma warning disable CA1062 // Validate arguments of public methods
-        : base($"{configuration.ApplicationName}:{nameof(KubernetesResource)}", name, options)
+         : base($"{configuration.ApplicationName}:{nameof(KubernetesResource)}", name, options)
 #pragma warning restore CA1062 // Validate arguments of public methods
     {
         Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
 
-        var nodePoolProfiles = new List<ManagedClusterAgentPoolProfileArgs>
+        var nodePoolProfiles = new List<ManagedClusterAgentPoolProfileArgs>();
+        foreach (var nodePoolGroup in configuration.Kubernetes.NodePools.GroupBy(x => x.Type))
         {
-            new ManagedClusterAgentPoolProfileArgs()
+            var index = 1;
+            foreach (var nodePool in nodePoolGroup)
             {
-                AvailabilityZones = configuration.KubernetesSystemNodesAvailabilityZones.ToList(),
-                Count = configuration.KubernetesSystemNodesMinimumNodeCount,
-                EnableAutoScaling = true,
-                MaxCount = configuration.KubernetesSystemNodesMaximumNodeCount,
-                MaxPods = configuration.KubernetesSystemNodesMaximumPods,
-                MinCount = configuration.KubernetesSystemNodesMinimumNodeCount,
-                Mode = AgentPoolMode.System,
-                Name = "system",
-                NodeLabels = new Dictionary<string, string>()
-                {
-                    { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
-                    { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
-                },
-                NodeTaints = new List<string>()
-                {
-                    { "CriticalAddonsOnly=true:NoSchedule" },
-                },
-                OsDiskSizeGB = configuration.KubernetesSystemNodesOsDiskSizeGB,
-                OsDiskType = configuration.KubernetesSystemNodesOSDiskType,
-                OsSKU = OSSKU.Ubuntu,
-                OsType = OSType.Linux,
-                ScaleSetEvictionPolicy = configuration.KubernetesSystemNodesScaleSetEvictionPolicy,
-                Tags = configuration.GetTags(location),
-                Type = AgentPoolType.VirtualMachineScaleSets,
-                UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
-                {
-                    MaxSurge = configuration.KubernetesSystemNodesMaximumSurge,
-                },
-                VmSize = configuration.KubernetesSystemNodesVmSize,
-                VnetSubnetID = virtualNetworkResource.SubnetId,
-            },
-        };
-
-        foreach (var availabilityZone in configuration.KubernetesUserNodesAvailabilityZones)
-        {
-            var proximityPlacementGroup = new ProximityPlacementGroup(
-                $"proximityplacementgroup{availabilityZone}-{location}-{configuration.Environment}-",
-                new ProximityPlacementGroupArgs()
-                {
-                    Location = location,
-                    ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
-                    ResourceGroupName = resourceGroup.Name,
-                    Tags = configuration.GetTags(location),
-                });
-
-            nodePoolProfiles.Add(
-                new ManagedClusterAgentPoolProfileArgs()
-                {
-                    AvailabilityZones = availabilityZone,
-                    Count = configuration.KubernetesUserNodesMinimumNodeCount,
-                    EnableAutoScaling = true,
-                    MaxCount = configuration.KubernetesUserNodesMaximumNodeCount,
-                    MaxPods = configuration.KubernetesUserNodesMaximumPods,
-                    MinCount = configuration.KubernetesUserNodesMinimumNodeCount,
-                    Mode = AgentPoolMode.User,
-                    Name = $"user{availabilityZone}",
-                    NodeLabels = new Dictionary<string, string>()
-                    {
-                        { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
-                        { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
-                    },
-                    OsDiskSizeGB = configuration.KubernetesUserNodesOsDiskSizeGB,
-                    OsDiskType = configuration.KubernetesUserNodesOSDiskType,
-                    OsSKU = OSSKU.Ubuntu,
-                    OsType = OSType.Linux,
-                    ProximityPlacementGroupID = proximityPlacementGroup.Id,
-                    ScaleSetEvictionPolicy = configuration.KubernetesUserNodesScaleSetEvictionPolicy,
-                    Tags = configuration.GetTags(location),
-                    Type = AgentPoolType.VirtualMachineScaleSets,
-                    UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
-                    {
-                        MaxSurge = configuration.KubernetesUserNodesMaximumSurge,
-                    },
-                    VmSize = configuration.KubernetesUserNodesVmSize,
-                    VnetSubnetID = virtualNetworkResource.SubnetId,
-                });
+                nodePoolProfiles.AddRange(
+                    GetManagedClusterAgentPoolProfileArgs(
+                        index,
+                        location,
+                        resourceGroup,
+                        configuration,
+                        nodePool,
+                        virtualNetworkResource));
+                ++index;
+            }
         }
 
         var managedCluster = new ManagedCluster(
@@ -114,7 +52,7 @@ public class KubernetesResource : ComponentResource
                 AgentPoolProfiles = nodePoolProfiles,
                 AutoUpgradeProfile = new ManagedClusterAutoUpgradeProfileArgs()
                 {
-                    UpgradeChannel = configuration.KubernetesUpgradeChannel,
+                    UpgradeChannel = configuration.Kubernetes.InternalUpgradeChannel,
                 },
                 DnsPrefix = "AzureNativeprovider",
                 EnableRBAC = true,
@@ -136,7 +74,7 @@ public class KubernetesResource : ComponentResource
                 Sku = new ManagedClusterSKUArgs()
                 {
                     Name = ManagedClusterSKUName.Basic,
-                    Tier = configuration.KubernetesSKUTier,
+                    Tier = configuration.Kubernetes.InternalSKUTier,
                 },
 
                 // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
@@ -161,13 +99,15 @@ public class KubernetesResource : ComponentResource
             {
                 ResourceGroupName = resourceGroup.Name,
                 ResourceName = managedCluster.Name,
-                TimeInWeek = configuration.KubernetesMaintenanceDays
-                    .Select(day =>
-                        new TimeInWeekArgs()
-                        {
-                            Day = day,
-                            HourSlots = configuration.KubernetesMaintenanceHourSlots.ToList(),
-                        })
+                TimeInWeek = configuration.Kubernetes.Maintenance
+                    .SelectMany(maintenance => maintenance
+                        .InternalDays
+                        .Select(day =>
+                            new TimeInWeekArgs()
+                            {
+                                Day = day,
+                                HourSlots = maintenance.HourSlots.ToList(),
+                            }))
                     .ToList(),
             });
 
@@ -230,5 +170,115 @@ public class KubernetesResource : ComponentResource
                 }
             })
             .Apply(Output.CreateSecret);
+    }
+
+    private static IEnumerable<ManagedClusterAgentPoolProfileArgs> GetManagedClusterAgentPoolProfileArgs(
+        int index,
+        string location,
+        ResourceGroup resourceGroup,
+        IConfiguration configuration,
+        KubernetesClusterNodePool kubernetesClusterNodePool,
+        VirtualNetworkResource virtualNetworkResource)
+    {
+        if (kubernetesClusterNodePool.AvailabilityZones is not null &&
+            kubernetesClusterNodePool.Type is KubernetesClusterNodePoolType.System or KubernetesClusterNodePoolType.User &&
+            Azure.LocationsSupportingAvailabilityZones.Contains(location))
+        {
+            foreach (var availabilityZone in kubernetesClusterNodePool.AvailabilityZones)
+            {
+#pragma warning disable CA1308 // Normalize strings to uppercase
+                var name = $"{kubernetesClusterNodePool.Type.ToString().ToLowerInvariant()}{index}az{availabilityZone}";
+#pragma warning restore CA1308 // Normalize strings to uppercase
+                var proximityPlacementGroup = new ProximityPlacementGroup(
+                    $"proximityplacementgroup-{name}-{location}-{configuration.Environment}-",
+                    new ProximityPlacementGroupArgs()
+                    {
+                        Location = location,
+                        ProximityPlacementGroupType = ProximityPlacementGroupType.Standard,
+                        ResourceGroupName = resourceGroup.Name,
+                        Tags = configuration.GetTags(location),
+                    });
+
+                yield return GetManagedClusterAgentPoolProfileArgs(
+                    name,
+                    location,
+                    configuration,
+                    kubernetesClusterNodePool,
+                    virtualNetworkResource,
+                    availabilityZone,
+                    proximityPlacementGroup);
+            }
+        }
+        else
+        {
+            yield return GetManagedClusterAgentPoolProfileArgs(
+#pragma warning disable CA1308 // Normalize strings to uppercase
+                $"{kubernetesClusterNodePool.Type.ToString().ToLowerInvariant()}{index}",
+#pragma warning restore CA1308 // Normalize strings to uppercase
+                location,
+                configuration,
+                kubernetesClusterNodePool,
+                virtualNetworkResource);
+        }
+    }
+
+    private static ManagedClusterAgentPoolProfileArgs GetManagedClusterAgentPoolProfileArgs(
+        string name,
+        string location,
+        IConfiguration configuration,
+        KubernetesClusterNodePool kubernetesClusterNodePool,
+        VirtualNetworkResource virtualNetworkResource,
+        int? availabilityZone = null,
+        ProximityPlacementGroup? proximityPlacementGroup = null)
+    {
+        var managedClusterAgentPoolProfileArgs = new ManagedClusterAgentPoolProfileArgs()
+        {
+            Count = kubernetesClusterNodePool.MinimumNodeCount,
+            EnableAutoScaling = true,
+            MaxCount = kubernetesClusterNodePool.MaximumNodeCount,
+            MaxPods = kubernetesClusterNodePool.MaximumPods,
+            MinCount = kubernetesClusterNodePool.MinimumNodeCount,
+            Mode = kubernetesClusterNodePool.InternalMode,
+            Name = name,
+            NodeLabels = new Dictionary<string, string>()
+            {
+                { $"{configuration.ApplicationName}.com/application", configuration.ApplicationName },
+                { $"{configuration.ApplicationName}.com/environment", configuration.Environment },
+            },
+            OsDiskSizeGB = kubernetesClusterNodePool.OsDiskSizeGB,
+            OsDiskType = kubernetesClusterNodePool.InternalOSDiskType,
+            OsSKU = OSSKU.Ubuntu,
+            OsType = OSType.Linux,
+            ScaleSetEvictionPolicy = kubernetesClusterNodePool.InternalScaleSetEvictionPolicy,
+            Tags = configuration.GetTags(location),
+            Type = AgentPoolType.VirtualMachineScaleSets,
+            UpgradeSettings = new AgentPoolUpgradeSettingsArgs()
+            {
+                MaxSurge = kubernetesClusterNodePool.MaximumSurge,
+            },
+            VmSize = kubernetesClusterNodePool.VmSize,
+            VnetSubnetID = virtualNetworkResource.SubnetId,
+        };
+
+        if (availabilityZone is not null)
+        {
+            managedClusterAgentPoolProfileArgs.AvailabilityZones =
+                new string[] { availabilityZone.Value.ToString(CultureInfo.InvariantCulture) };
+        }
+
+        if (proximityPlacementGroup is not null)
+        {
+            managedClusterAgentPoolProfileArgs.ProximityPlacementGroupID = proximityPlacementGroup.Id;
+        }
+
+        if (kubernetesClusterNodePool.Type is KubernetesClusterNodePoolType.System)
+        {
+            managedClusterAgentPoolProfileArgs.NodeTaints = new List<string>()
+            {
+                { "CriticalAddonsOnly=true:NoSchedule" },
+            };
+        }
+
+        return managedClusterAgentPoolProfileArgs;
     }
 }

@@ -5,6 +5,7 @@ using Pulumi;
 using Pulumi.AzureNative.OperationalInsights;
 using Pulumi.AzureNative.OperationalInsights.Inputs;
 using Pulumi.AzureNative.Resources;
+using Ummati.Infrastructure.Configuration;
 
 public class CommonResource : ComponentResource
 {

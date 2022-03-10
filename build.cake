@@ -90,6 +90,25 @@ Task("UpdateServicePrincipal")
         SetPulumiConfig("azure-native:subscriptionId", subscriptionId, secret: true);
     });
 
+Task("UpdateAzureLocations")
+    .Description("")
+    .Does(() =>
+    {
+        StartProcess(
+            "powershell",
+            new ProcessSettings()
+                .WithArguments(x => x
+                    .Append("az")
+                    .Append("account")
+                    .Append("list-locations"))
+                .SetRedirectStandardOutput(true),
+                out var lines);
+        foreach (var file in GetFiles("**/AzureLocations.json"))
+        {
+            System.IO.File.WriteAllLines(file.ToString(), lines);
+        }
+    });
+
 Task("Default")
     .Description("Cleans, restores NuGet packages, builds the solution and then runs unit tests.")
     .IsDependentOn("Build")

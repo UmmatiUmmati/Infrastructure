@@ -2,6 +2,7 @@ namespace Ummati.Infrastructure.Resources;
 
 using Pulumi;
 using Pulumi.AzureAD;
+using Ummati.Infrastructure.Configuration;
 
 public class IdentityResource : ComponentResource
 {

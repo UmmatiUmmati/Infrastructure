@@ -1,4 +1,4 @@
-namespace Ummati.Infrastructure;
+namespace Ummati.Infrastructure.Configuration;
 
 using System;
 using System.Collections.Generic;

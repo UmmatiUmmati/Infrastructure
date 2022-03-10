@@ -19,35 +19,39 @@ config:
   ummati:CommonLocation: northeurope
   ummati:Locations:
     - northeurope
-
-  ummati:KubernetesMaintenanceDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-  ummati:KubernetesMaintenanceHourSlots: ["1", "2"]
-  ummati:KubernetesSKUTier: "Free"
-  ummati:KubernetesUpgradeChannel: "Stable"
-
-  ummati:KubernetesSystemNodesAvailabilityZones: ["1", "2", "3"]
-  ummati:KubernetesSystemNodesMaximumPods: "30"
-  ummati:KubernetesSystemNodesMaximumNodeCount: "3"
-  ummati:KubernetesSystemNodesMaximumSurge: "33%"
-  ummati:KubernetesSystemNodesMinimumNodeCount: "3"
-  ummati:KubernetesSystemNodesOsDiskSizeGB: "100"
-  ummati:KubernetesSystemNodesOSDiskType: "Managed"
-  ummati:KubernetesSystemNodesScaleSetEvictionPolicy: "Delete"
-  ummati:KubernetesSystemNodesVmSize: "Standard_B2s"
-
-  ummati:KubernetesUserNodesAvailabilityZones: ["1", "2", "3"]
-  ummati:KubernetesUserNodesMaximumPods: "250"
-  ummati:KubernetesUserNodesMaximumNodeCount: "3"
-  ummati:KubernetesUserNodesMaximumSurge: "33%"
-  ummati:KubernetesUserNodesMinimumNodeCount: "1"
-  ummati:KubernetesUserNodesOsDiskSizeGB: "100"
-  ummati:KubernetesUserNodesOSDiskType: "Managed"
-  ummati:KubernetesUserNodesScaleSetEvictionPolicy: "Delete"
-  ummati:KubernetesUserNodesVmSize: "Standard_B2s"
-
-  ummati:ContainerConcurrentRequests: "50"
-  ummati:ContainerCpu: "0.25"
-  ummati:ContainerImageName: muhammadrehansaeed/api:0.0.0-preview.0
-  ummati:ContainerMaxReplicas: "10"
-  ummati:ContainerMemory: 0.5Gi
-  ummati:ContainerMinReplicas: "1"
+  ummati:Kubernetes:
+    Maintenance:
+      - Days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        HourSlots: [1, 2]
+    SKUTier: "Free"
+    UpgradeChannel: "Stable"
+    NodePools:
+      - Type: System
+        AvailabilityZones: [1, 2, 3]
+        MaximumPods: 30
+        MaximumNodeCount: 3
+        MaximumSurge: "33%"
+        MinimumNodeCount: 3
+        OsDiskSizeGB: 100
+        OSDiskType: "Managed"
+        ScaleSetEvictionPolicy: "Delete"
+        VmSize: "Standard_B2s"
+      - Type: User
+        AvailabilityZones: [1, 2, 3]
+        MaximumPods: 250
+        MaximumNodeCount: 3
+        MaximumSurge: "33%"
+        MinimumNodeCount: 1
+        OsDiskSizeGB: 100
+        OSDiskType: "Managed"
+        ScaleSetEvictionPolicy: "Delete"
+        VmSize: "Standard_B2s"
+      - Type: Spot
+        MaximumPods: 250
+        MaximumNodeCount: 3
+        MaximumSurge: "33%"
+        MinimumNodeCount: 0
+        OsDiskSizeGB: 100
+        OSDiskType: "Managed"
+        ScaleSetEvictionPolicy: "Delete"
+        VmSize: "Standard_B2s"
