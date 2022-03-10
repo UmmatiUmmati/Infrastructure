@@ -54,7 +54,7 @@ public class KubernetesResource : ComponentResource
                 {
                     UpgradeChannel = configuration.Kubernetes.InternalUpgradeChannel,
                 },
-                DnsPrefix = "AzureNativeprovider",
+                DnsPrefix = configuration.ApplicationName,
                 EnableRBAC = true,
                 Tags = configuration.GetTags(location),
                 NodeResourceGroup = $"{configuration.ApplicationName}-kubernetesnodes-{location}-{configuration.Environment}",
