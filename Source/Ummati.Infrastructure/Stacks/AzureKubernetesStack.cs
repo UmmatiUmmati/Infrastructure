@@ -40,16 +40,16 @@ public class AzureKubernetesStack : Stack
                 location,
                 resourceGroup);
 
-            // var kubernetesResource = new KubernetesResource(
-            //     $"virtualnetwork-{location}-{Configuration.Environment}-",
-            //     Configuration,
-            //     location,
-            //     resourceGroup,
-            //     commonResource,
-            //     identityResource,
-            //     virtualNetworkResource);
+            var kubernetesResource = new KubernetesResource(
+                $"kubernetes-{location}-{Configuration.Environment}-",
+                Configuration,
+                location,
+                resourceGroup,
+                commonResource,
+                identityResource,
+                virtualNetworkResource);
 
-            // outputs.Add(kubernetesResource.KubeConfig);
+            outputs.Add(kubernetesResource.KubeConfig);
         }
 
         this.KubeConfigs = Output.All(outputs.Select(x => x));
