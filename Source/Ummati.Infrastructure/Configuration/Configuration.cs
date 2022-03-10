@@ -14,7 +14,7 @@ public class Configuration : IConfiguration
 
     public string CommonLocation => this.config.GetString(nameof(this.CommonLocation));
 
-    public IEnumerable<string> Locations => this.config.Get<List<string>>(nameof(this.Locations));
+    public IEnumerable<string> Locations => this.config.GetFromJson<List<string>>(nameof(this.Locations));
 
-    public KubernetesCluster Kubernetes => this.config.Get<KubernetesCluster>(nameof(this.Kubernetes));
+    public KubernetesCluster Kubernetes => this.config.GetFromJson<KubernetesCluster>(nameof(this.Kubernetes));
 }
