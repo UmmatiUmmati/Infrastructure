@@ -27,19 +27,19 @@ config:
     UpgradeChannel: "Stable"
     NodePools:
       - Type: System
-        AvailabilityZones: [1, 2, 3]
+        AvailabilityZones: [1]
         MaximumPods: 30
-        MaximumNodeCount: 3
+        MaximumNodeCount: 1
         MaximumSurge: "33%"
-        MinimumNodeCount: 3
+        MinimumNodeCount: 1
         OsDiskSizeGB: 100
         OSDiskType: "Managed"
         ScaleSetEvictionPolicy: "Delete"
         VmSize: "Standard_B2s"
       - Type: User
-        AvailabilityZones: [1, 2, 3]
+        AvailabilityZones: [1]
         MaximumPods: 250
-        MaximumNodeCount: 3
+        MaximumNodeCount: 1
         MaximumSurge: "33%"
         MinimumNodeCount: 1
         OsDiskSizeGB: 100
