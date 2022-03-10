@@ -61,8 +61,8 @@ public class KubernetesResource : ComponentResource
                 NetworkProfile = new ContainerServiceNetworkProfileArgs()
                 {
                     NetworkPlugin = NetworkPlugin.Azure,
-                    DnsServiceIP = "10.0.2.254",
-                    ServiceCidr = "10.0.2.0/24",
+                    DnsServiceIP = "10.1.0.10",
+                    ServiceCidr = "10.1.0.0/16",
                     DockerBridgeCidr = "172.17.0.1/16",
                     LoadBalancerSku = LoadBalancerSku.Standard,
                 },
