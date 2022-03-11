@@ -25,17 +25,6 @@ public class KubernetesCluster
     /// </summary>
     public IEnumerable<KubernetesClusterNodePool> NodePools { get; set; } = default!;
 
-    /// <summary>
-    /// Gets or sets the user node pool under which all user workloads are run.
-    /// </summary>
-    public KubernetesClusterNodePool UserNodePool { get; set; } = default!;
-
-    /// <summary>
-    /// Gets or sets the spot node pool which uses cheap but temporary Azure spot virtual machines which can be used to run
-    /// batch workloads.
-    /// </summary>
-    public KubernetesClusterNodePool SpotNodePool { get; set; } = default!;
-
     internal ManagedClusterSKUTier InternalSKUTier =>
         this.SKUTier switch
         {

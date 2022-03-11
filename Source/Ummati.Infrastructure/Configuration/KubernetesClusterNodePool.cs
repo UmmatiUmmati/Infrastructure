@@ -13,14 +13,14 @@ public class KubernetesClusterNodePool
     public IEnumerable<int> AvailabilityZones { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the maximum number of pods allowed on a node. Minimum is one and maximum is 250.
-    /// </summary>
-    public int MaximumPods { get; set; } = default!;
-
-    /// <summary>
     /// Gets or sets the maximum number of nodes allowed in the cluster. Maximum is 100.
     /// </summary>
     public int MaximumNodeCount { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the maximum number of pods allowed on a node. Minimum is one and maximum is 250.
+    /// </summary>
+    public int MaximumPods { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets the maximum number of nodes to update at any one time. This can be a number e.g. 10 or a

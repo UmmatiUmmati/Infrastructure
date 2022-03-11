@@ -7,7 +7,14 @@ using Ummati.Infrastructure.Assets;
 internal static class Azure
 {
     public static IEnumerable<string> Locations =>
-        JsonSerializer.Deserialize<AzureLocation[]>(Resources.AzureLocations)!.Select(x => x.Name);
+        JsonSerializer
+            .Deserialize<AzureLocation[]>(
+                Resources.AzureLocations,
+                new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                })!
+            .Select(x => x.Name);
 
     // Ideally these should be returned by the Azure CLI, so they can appear in AzureLocations.json.
     // See https://github.com/Azure/azure-cli/issues/21579
