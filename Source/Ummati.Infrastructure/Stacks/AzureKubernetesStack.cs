@@ -33,7 +33,7 @@ public class AzureKubernetesStack : Stack
             Configuration.CommonLocation,
             commonResourceGroup);
 
-        var outputs = new List<Output<string>>();
+        var kubernetesResources = new List<KubernetesResource>();
         foreach (var location in Configuration.Locations)
         {
             var identityResource = new IdentityResource(
@@ -49,25 +49,28 @@ public class AzureKubernetesStack : Stack
                 location,
                 resourceGroup);
 
-            var kubernetesResource = new KubernetesResource(
+            kubernetesResources.Add(
+            new KubernetesResource(
                 $"kubernetes-{location}-{Configuration.Environment}-",
                 Configuration,
                 location,
                 resourceGroup,
                 commonResource,
                 identityResource,
-                virtualNetworkResource);
-
-            outputs.Add(kubernetesResource.KubeConfig);
+                virtualNetworkResource));
         }
 
-        this.KubeConfigs = Output.All(outputs.Select(x => x));
+        this.KubeConfigs = Output.All(kubernetesResources.Select(x => x.KubeConfig));
+        this.KubeFqdns = Output.All(kubernetesResources.Select(x => x.KubeFqdn));
     }
 
     public static IConfiguration Configuration { get; set; } = default!;
 
     [Output]
     public Output<ImmutableArray<string>> KubeConfigs { get; private set; }
+
+    [Output]
+    public Output<ImmutableArray<string>> KubeFqdns { get; private set; }
 
     private static ResourceGroup GetResourceGroup(string name, string location) =>
         new(

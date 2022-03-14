@@ -1,7 +1,7 @@
 namespace Ummati.Infrastructure.Configuration;
 
 using System.Collections.Generic;
-using Pulumi.AzureNative.ContainerService;
+using Pulumi.AzureNative.ContainerService.V20220101;
 using Ummati.Infrastructure.Configuration.Finished;
 
 public class KubernetesClusterNodePool
@@ -75,16 +75,16 @@ public class KubernetesClusterNodePool
     internal OSDiskType InternalOSDiskType =>
         this.OSDiskType switch
         {
-            KubernetesNodeOSDiskType.Managed => Pulumi.AzureNative.ContainerService.OSDiskType.Managed,
-            KubernetesNodeOSDiskType.Ephemeral => Pulumi.AzureNative.ContainerService.OSDiskType.Ephemeral,
+            KubernetesNodeOSDiskType.Managed => Pulumi.AzureNative.ContainerService.V20220101.OSDiskType.Managed,
+            KubernetesNodeOSDiskType.Ephemeral => Pulumi.AzureNative.ContainerService.V20220101.OSDiskType.Ephemeral,
             _ => throw new InvalidOperationException($"{nameof(KubernetesNodeOSDiskType)} '{this.OSDiskType}' not recognised."),
         };
 
     internal ScaleSetEvictionPolicy InternalScaleSetEvictionPolicy =>
         this.ScaleSetEvictionPolicy switch
         {
-            KubernetesNodeScaleSetEvictionPolicy.Delete => Pulumi.AzureNative.ContainerService.ScaleSetEvictionPolicy.Delete,
-            KubernetesNodeScaleSetEvictionPolicy.Deallocate => Pulumi.AzureNative.ContainerService.ScaleSetEvictionPolicy.Deallocate,
+            KubernetesNodeScaleSetEvictionPolicy.Delete => Pulumi.AzureNative.ContainerService.V20220101.ScaleSetEvictionPolicy.Delete,
+            KubernetesNodeScaleSetEvictionPolicy.Deallocate => Pulumi.AzureNative.ContainerService.V20220101.ScaleSetEvictionPolicy.Deallocate,
             _ => throw new InvalidOperationException($"{nameof(KubernetesNodeScaleSetEvictionPolicy)} '{this.ScaleSetEvictionPolicy}' not recognised."),
         };
 }

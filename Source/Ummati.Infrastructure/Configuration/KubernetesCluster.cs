@@ -1,6 +1,6 @@
 namespace Ummati.Infrastructure.Configuration;
 
-using Pulumi.AzureNative.ContainerService;
+using Pulumi.AzureNative.ContainerService.V20220101;
 using Ummati.Infrastructure.Configuration.Finished;
 
 public class KubernetesCluster
@@ -36,11 +36,11 @@ public class KubernetesCluster
     internal UpgradeChannel InternalUpgradeChannel =>
         this.UpgradeChannel switch
         {
-            KubernetesClusterUpgradeChannel.Rapid => Pulumi.AzureNative.ContainerService.UpgradeChannel.Rapid,
-            KubernetesClusterUpgradeChannel.Stable => Pulumi.AzureNative.ContainerService.UpgradeChannel.Stable,
-            KubernetesClusterUpgradeChannel.Patch => Pulumi.AzureNative.ContainerService.UpgradeChannel.Patch,
-            KubernetesClusterUpgradeChannel.NodeImage => Pulumi.AzureNative.ContainerService.UpgradeChannel.Node_image,
-            KubernetesClusterUpgradeChannel.None => Pulumi.AzureNative.ContainerService.UpgradeChannel.None,
+            KubernetesClusterUpgradeChannel.Rapid => Pulumi.AzureNative.ContainerService.V20220101.UpgradeChannel.Rapid,
+            KubernetesClusterUpgradeChannel.Stable => Pulumi.AzureNative.ContainerService.V20220101.UpgradeChannel.Stable,
+            KubernetesClusterUpgradeChannel.Patch => Pulumi.AzureNative.ContainerService.V20220101.UpgradeChannel.Patch,
+            KubernetesClusterUpgradeChannel.NodeImage => Pulumi.AzureNative.ContainerService.V20220101.UpgradeChannel.Node_image,
+            KubernetesClusterUpgradeChannel.None => Pulumi.AzureNative.ContainerService.V20220101.UpgradeChannel.None,
             _ => throw new InvalidOperationException($"{nameof(KubernetesClusterUpgradeChannel)} '{this.UpgradeChannel}' not recognised."),
         };
 }

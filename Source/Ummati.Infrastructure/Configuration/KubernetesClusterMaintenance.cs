@@ -1,6 +1,6 @@
 namespace Ummati.Infrastructure.Configuration;
 
-using Pulumi.AzureNative.ContainerService;
+using Pulumi.AzureNative.ContainerService.V20220101;
 
 /// <summary>
 /// Allowed days and times when scheduled maintenance on a cluster is allowed to occur.

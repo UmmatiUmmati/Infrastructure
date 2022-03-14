@@ -4,8 +4,8 @@ using System.Globalization;
 using System.Text;
 using Pulumi;
 using Pulumi.AzureNative.Compute;
-using Pulumi.AzureNative.ContainerService;
-using Pulumi.AzureNative.ContainerService.Inputs;
+using Pulumi.AzureNative.ContainerService.V20220101;
+using Pulumi.AzureNative.ContainerService.V20220101.Inputs;
 using Pulumi.AzureNative.Resources;
 using Ummati.Infrastructure.Configuration;
 
@@ -53,6 +53,14 @@ public class KubernetesResource : ComponentResource
                 AutoUpgradeProfile = new ManagedClusterAutoUpgradeProfileArgs()
                 {
                     UpgradeChannel = configuration.Kubernetes.InternalUpgradeChannel,
+                },
+                ApiServerAccessProfile = new ManagedClusterAPIServerAccessProfileArgs()
+                {
+                    EnablePrivateCluster = true,
+                    EnablePrivateClusterPublicFQDN = true,
+                    PrivateDNSZone = "none",
+
+                    // DisableRunCommand = true,
                 },
                 DnsPrefix = configuration.ApplicationName,
                 EnableRBAC = true,
@@ -112,11 +120,14 @@ public class KubernetesResource : ComponentResource
             });
 
         this.KubeConfig = GetKubeConfig(resourceGroup.Name, managedCluster.Name);
+        this.KubeFqdn = managedCluster.Fqdn;
 
         this.RegisterOutputs();
     }
 
     public Output<string> KubeConfig { get; set; }
+
+    public Output<string> KubeFqdn { get; set; }
 
     private static void Validate(
         string name,
