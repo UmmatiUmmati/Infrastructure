@@ -9,22 +9,23 @@ using Pulumi.AzureNative.ContainerService.V20220101.Inputs;
 using Pulumi.AzureNative.Resources;
 using Ummati.Infrastructure.Configuration;
 
-public class KubernetesResource : ComponentResource
+public class KubernetesResource : ComponentResource<KubernetesResource>
 {
     public KubernetesResource(
         string name,
         IConfiguration configuration,
         string location,
         ResourceGroup resourceGroup,
-        CommonResource commonResource,
+        MonitorResource monitorResource,
         IdentityResource identityResource,
         VirtualNetworkResource virtualNetworkResource,
         ComponentResourceOptions? options = null)
-#pragma warning disable CA1062 // Validate arguments of public methods
-         : base($"{configuration.ApplicationName}:{nameof(KubernetesResource)}", name, options)
-#pragma warning restore CA1062 // Validate arguments of public methods
+         : base(name, configuration, location, options)
     {
-        Validate(name, location, resourceGroup, commonResource, identityResource, virtualNetworkResource);
+        ArgumentNullException.ThrowIfNull(resourceGroup);
+        ArgumentNullException.ThrowIfNull(monitorResource);
+        ArgumentNullException.ThrowIfNull(identityResource);
+        ArgumentNullException.ThrowIfNull(virtualNetworkResource);
 
         var nodePoolProfiles = new List<ManagedClusterAgentPoolProfileArgs>();
         foreach (var nodePoolGroup in configuration.Kubernetes.NodePools.GroupBy(x => x.Type))
@@ -128,32 +129,6 @@ public class KubernetesResource : ComponentResource
     public Output<string> KubeConfig { get; set; }
 
     public Output<string> KubeFqdn { get; set; }
-
-    private static void Validate(
-        string name,
-        string location,
-        ResourceGroup resourceGroup,
-        CommonResource commonResource,
-        IdentityResource identityResource,
-        VirtualNetworkResource virtualNetworkResource)
-    {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-        ArgumentNullException.ThrowIfNull(resourceGroup);
-        ArgumentNullException.ThrowIfNull(commonResource);
-        ArgumentNullException.ThrowIfNull(identityResource);
-        ArgumentNullException.ThrowIfNull(virtualNetworkResource);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
-    }
 
     private static Output<string> GetKubeConfig(
         Output<string> resourceGroupName,

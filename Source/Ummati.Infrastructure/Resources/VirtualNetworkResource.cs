@@ -1,13 +1,11 @@
 namespace Ummati.Infrastructure.Resources;
-
-using System;
 using Pulumi;
 using Pulumi.AzureNative.Network;
 using Pulumi.AzureNative.Network.Inputs;
 using Pulumi.AzureNative.Resources;
 using Ummati.Infrastructure.Configuration;
 
-public class VirtualNetworkResource : ComponentResource
+public class VirtualNetworkResource : ComponentResource<VirtualNetworkResource>
 {
     public VirtualNetworkResource(
         string name,
@@ -15,14 +13,12 @@ public class VirtualNetworkResource : ComponentResource
         string location,
         ResourceGroup resourceGroup,
         ComponentResourceOptions? options = null)
-#pragma warning disable CA1062 // Validate arguments of public methods
-        : base($"{configuration.ApplicationName}:{nameof(VirtualNetworkResource)}", name, options)
-#pragma warning restore CA1062 // Validate arguments of public methods
+        : base(name, configuration, location, options)
     {
-        Validate(name, location, resourceGroup);
+        ArgumentNullException.ThrowIfNull(resourceGroup);
 
         var virtualNetwork = new VirtualNetwork(
-            $"virtualnetwork-{location}-{configuration.Environment}-",
+            $"{name}-virtualnetwork-{location}-{configuration.Environment}-",
             new VirtualNetworkArgs()
             {
                 AddressSpace = new AddressSpaceArgs()
@@ -36,16 +32,18 @@ public class VirtualNetworkResource : ComponentResource
                 ResourceGroupName = resourceGroup.Name,
                 Tags = configuration.GetTags(location),
             });
+
         var subnet = new Subnet(
-            $"subnet-{location}-{configuration.Environment}",
+            $"{name}-subnet-{location}-{configuration.Environment}",
             new Pulumi.AzureNative.Network.SubnetArgs()
             {
                 AddressPrefix = $"10.0.0.0/16",
                 ResourceGroupName = resourceGroup.Name,
                 VirtualNetworkName = virtualNetwork.Name,
             });
+
         var networkWatcher = new NetworkWatcher(
-            $"networkwatcher-{location}-{configuration.Environment}-",
+            $"{name}-networkwatcher-{location}-{configuration.Environment}-",
             new NetworkWatcherArgs()
             {
                 Location = location,
@@ -59,21 +57,4 @@ public class VirtualNetworkResource : ComponentResource
     }
 
     public Output<string> SubnetId { get; set; }
-
-    private static void Validate(string name, string location, ResourceGroup resourceGroup)
-    {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-        ArgumentNullException.ThrowIfNull(resourceGroup);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
-    }
 }

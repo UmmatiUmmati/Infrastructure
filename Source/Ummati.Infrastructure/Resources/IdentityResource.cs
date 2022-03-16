@@ -4,23 +4,19 @@ using Pulumi;
 using Pulumi.AzureAD;
 using Ummati.Infrastructure.Configuration;
 
-public class IdentityResource : ComponentResource
+public class IdentityResource : ComponentResource<IdentityResource>
 {
     public IdentityResource(
         string name,
         IConfiguration configuration,
         string location,
         ComponentResourceOptions? options = null)
-#pragma warning disable CA1062 // Validate arguments of public methods
-        : base($"{configuration.ApplicationName}:{nameof(IdentityResource)}", name, options)
-#pragma warning restore CA1062 // Validate arguments of public methods
+        : base(name, configuration, location, options)
     {
-        Validate(name, location);
-
         var azureActiveDirectoryTags = configuration.GetAzureActiveDirecoryTags();
         var azureActiveDirectoryDescription = configuration.GetAzureActiveDirectoryDescription();
 
-        var applicationName = $"{configuration.ApplicationName}-application-{location}-{configuration.Environment}";
+        var applicationName = $"{configuration.ApplicationName}-{name}-application-{location}-{configuration.Environment}";
         var application = new Application(
             applicationName,
             new ApplicationArgs()
@@ -30,7 +26,7 @@ public class IdentityResource : ComponentResource
                 Tags = azureActiveDirectoryTags,
             });
         var servicePrincipal = new ServicePrincipal(
-            $"{configuration.ApplicationName}-service-principal-{location}-{configuration.Environment}",
+            $"{configuration.ApplicationName}-{name}-serviceprincipal-{location}-{configuration.Environment}",
             new ServicePrincipalArgs()
             {
                 ApplicationId = application.ApplicationId,
@@ -39,7 +35,7 @@ public class IdentityResource : ComponentResource
                 Tags = azureActiveDirectoryTags,
             });
         var servicePrincipalPassword = new ServicePrincipalPassword(
-            $"{configuration.ApplicationName}-service-principal-password-{location}-{configuration.Environment}",
+            $"{configuration.ApplicationName}-{name}-serviceprincipalpassword-{location}-{configuration.Environment}",
             new ServicePrincipalPasswordArgs()
             {
                 // This cannot be changed after deployment.
@@ -56,20 +52,4 @@ public class IdentityResource : ComponentResource
     public Output<string> ClientId { get; set; }
 
     public Output<string> ClientSecret { get; set; }
-
-    private static void Validate(string name, string location)
-    {
-        ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(location);
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException($"'{nameof(name)}' cannot be empty.", nameof(name));
-        }
-
-        if (string.IsNullOrEmpty(location))
-        {
-            throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
-        }
-    }
 }

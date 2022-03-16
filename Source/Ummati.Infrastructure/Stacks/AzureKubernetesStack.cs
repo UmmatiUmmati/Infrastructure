@@ -18,38 +18,18 @@ public class AzureKubernetesStack : Stack
             Configuration.Validate();
         }
 
-        var commonResourceGroup = GetResourceGroup("common", Configuration.CommonLocation);
-        var commonResource = new CommonResource(
-            $"common-{Configuration.CommonLocation}-{Configuration.Environment}-",
+        var monitorResourceGroup = GetResourceGroup("monitor", Configuration.CommonLocation);
+        var monitorResource = new MonitorResource(
+            $"common",
             Configuration,
             Configuration.CommonLocation,
-            commonResourceGroup);
+            monitorResourceGroup);
 
         var kubernetesResources = new List<KubernetesResource>();
         foreach (var location in Configuration.Locations)
         {
-            var identityResource = new IdentityResource(
-                $"identity-{location}-{Configuration.Environment}-",
-                Configuration,
-                location);
-
-            var resourceGroup = GetResourceGroup("kubernetes", location);
-
-            var virtualNetworkResource = new VirtualNetworkResource(
-                $"virtualnetwork-{location}-{Configuration.Environment}-",
-                Configuration,
-                location,
-                resourceGroup);
-
-            kubernetesResources.Add(
-            new KubernetesResource(
-                $"kubernetes-{location}-{Configuration.Environment}-",
-                Configuration,
-                location,
-                resourceGroup,
-                commonResource,
-                identityResource,
-                virtualNetworkResource));
+            var kubernetesResource = CreateKubernetesResource(monitorResource, location);
+            kubernetesResources.Add(kubernetesResource);
         }
 
         this.KubeConfigs = Output.All(kubernetesResources.Select(x => x.KubeConfig));
@@ -63,6 +43,33 @@ public class AzureKubernetesStack : Stack
 
     [Output]
     public Output<ImmutableArray<string>> KubeFqdns { get; private set; }
+
+    private static KubernetesResource CreateKubernetesResource(
+        MonitorResource monitorResource,
+        string location)
+    {
+        var identityResource = new IdentityResource(
+            $"kubernetes",
+            Configuration,
+            location);
+
+        var resourceGroup = GetResourceGroup("kubernetes", location);
+
+        var virtualNetworkResource = new VirtualNetworkResource(
+            "kubernetes",
+            Configuration,
+            location,
+            resourceGroup);
+
+        return new KubernetesResource(
+            $"kubernetes",
+            Configuration,
+            location,
+            resourceGroup,
+            monitorResource,
+            identityResource,
+            virtualNetworkResource);
+    }
 
     private static ResourceGroup GetResourceGroup(string name, string location) =>
         new(
