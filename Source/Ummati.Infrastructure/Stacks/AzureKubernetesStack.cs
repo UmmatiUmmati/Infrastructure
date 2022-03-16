@@ -1,12 +1,10 @@
 namespace Ummati.Infrastructure.Stacks;
 
 using System.Collections.Immutable;
-using FluentValidation;
 using Pulumi;
 using Pulumi.AzureNative.Resources;
 using Ummati.Infrastructure.Configuration;
 using Ummati.Infrastructure.Resources;
-using Ummati.Infrastructure.Validators;
 
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
 public class AzureKubernetesStack : Stack
@@ -17,13 +15,7 @@ public class AzureKubernetesStack : Stack
         if (Configuration is null)
         {
             Configuration = new Configuration();
-            var configurationValidator = new ConfigurationValidator();
-            var validationResult = configurationValidator.Validate(Configuration);
-            if (!validationResult.IsValid)
-            {
-                Log.Error($"Validation of configuration failed.{Environment.NewLine}{validationResult}");
-                configurationValidator.ValidateAndThrow(Configuration);
-            }
+            Configuration.Validate();
         }
 
         var commonResourceGroup = GetResourceGroup("common", Configuration.CommonLocation);

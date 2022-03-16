@@ -2,7 +2,12 @@ namespace Ummati.Infrastructure.Configuration;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
+using FluentValidation;
+using Pulumi;
+using Ummati.Infrastructure.Validators;
 
 public static class ConfigurationExtensions
 {
@@ -32,5 +37,26 @@ public static class ConfigurationExtensions
             { TagName.Environment, configuration.Environment },
             { TagName.Location, location },
         };
+    }
+
+    public static void Validate(this IConfiguration configuration)
+    {
+        var configurationValidator = new ConfigurationValidator();
+        var validationResult = configurationValidator.Validate(configuration);
+        if (!validationResult.IsValid)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("Validation of configuration failed.");
+
+            var i = 1;
+            foreach (var error in validationResult.Errors)
+            {
+                stringBuilder.AppendLine(CultureInfo.InvariantCulture, $"{i}. {error}");
+                ++i;
+            }
+
+            Log.Error(stringBuilder.ToString());
+            configurationValidator.ValidateAndThrow(configuration);
+        }
     }
 }
