@@ -19,7 +19,7 @@ public class MonitorResource : ComponentResource<MonitorResource>
         ArgumentNullException.ThrowIfNull(resourceGroup);
 
         var workspace = new Workspace(
-            $"{name}-workspace-{location}-{configuration.Environment}-",
+            $"workspace-{location}-{configuration.Environment}-",
             new WorkspaceArgs()
             {
                 Location = location,

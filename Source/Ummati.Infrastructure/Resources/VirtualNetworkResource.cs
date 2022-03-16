@@ -1,4 +1,5 @@
 namespace Ummati.Infrastructure.Resources;
+
 using Pulumi;
 using Pulumi.AzureNative.Network;
 using Pulumi.AzureNative.Network.Inputs;
@@ -40,15 +41,6 @@ public class VirtualNetworkResource : ComponentResource<VirtualNetworkResource>
                 AddressPrefix = $"10.0.0.0/16",
                 ResourceGroupName = resourceGroup.Name,
                 VirtualNetworkName = virtualNetwork.Name,
-            });
-
-        var networkWatcher = new NetworkWatcher(
-            $"{name}-networkwatcher-{location}-{configuration.Environment}-",
-            new NetworkWatcherArgs()
-            {
-                Location = location,
-                ResourceGroupName = resourceGroup.Name,
-                Tags = configuration.GetTags(location),
             });
 
         this.SubnetId = subnet.Id;
