@@ -7,10 +7,10 @@ using Ummati.Infrastructure.Configuration;
 using Ummati.Infrastructure.Resources;
 
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
-public class AzureKubernetesStack : Stack
+public class MainStack : Stack
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
-    public AzureKubernetesStack()
+    public MainStack()
     {
         if (Configuration is null)
         {
