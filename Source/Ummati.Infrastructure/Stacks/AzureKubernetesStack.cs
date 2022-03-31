@@ -35,6 +35,19 @@ public class AzureKubernetesStack : Stack
             Configuration.CommonLocation,
             monitorResourceGroup);
 
+        var bastionResourceGroup = GetResourceGroup("bastion", Configuration.CommonLocation);
+        var bastionVirtualNetworkResource = new VirtualNetworkResource(
+            "bastion",
+            Configuration,
+            Configuration.CommonLocation,
+            bastionResourceGroup);
+        var bastionResource = new BastionResource(
+            $"common",
+            Configuration,
+            Configuration.CommonLocation,
+            bastionResourceGroup,
+            bastionVirtualNetworkResource);
+
         var kubernetesResources = new List<KubernetesResource>();
         foreach (var location in Configuration.Locations)
         {
@@ -44,7 +57,7 @@ public class AzureKubernetesStack : Stack
                 location);
 
             var resourceGroup = GetResourceGroup("kubernetes", location);
-            var virtualNetworkResource = new VirtualNetworkResource(
+            var kubernetesVirtualNetworkResource = new VirtualNetworkResource(
                 "kubernetes",
                 Configuration,
                 location,
@@ -56,7 +69,7 @@ public class AzureKubernetesStack : Stack
                 resourceGroup,
                 monitorResource,
                 identityResource,
-                virtualNetworkResource);
+                kubernetesVirtualNetworkResource);
             kubernetesResources.Add(kubernetesResource);
         }
 
