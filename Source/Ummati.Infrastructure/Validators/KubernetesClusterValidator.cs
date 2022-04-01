@@ -15,6 +15,7 @@ internal class KubernetesClusterValidator : AbstractValidator<KubernetesCluster>
             .ForEach(x => x.SetValidator(new KubernetesClusterMaintenanceValidator()));
         this.RuleFor(x => x.SKUTier).IsInEnum();
         this.RuleFor(x => x.UpgradeChannel).IsInEnum();
+        this.RuleFor(x => x.LoadBalancer).SetValidator(new KubernetesClusterLoadBalancerValidator());
         this.RuleFor(x => x.NodePools)
             .NotNull()
             .NotEmpty()

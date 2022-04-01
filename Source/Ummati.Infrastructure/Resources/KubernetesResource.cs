@@ -11,6 +11,8 @@ using Ummati.Infrastructure.Configuration;
 
 public class KubernetesResource : ComponentResource<KubernetesResource>
 {
+    private const int PortsPerIP = 64_000;
+
     public KubernetesResource(
         string name,
         IConfiguration configuration,
@@ -45,6 +47,10 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
             }
         }
 
+        var totalNodeCountPossible = configuration.Kubernetes.NodePools.Select(x => x.MaximumNodeCountPossible).Sum();
+        var outboundIPCount = Math.Max(1, totalNodeCountPossible / (PortsPerIP / configuration.Kubernetes.LoadBalancer.PortsPerNode));
+        Log.Info($"{totalNodeCountPossible} nodes possible. {configuration.Kubernetes.LoadBalancer.PortsPerNode} ports per node. {outboundIPCount} outbound IP's");
+
         var managedCluster = new ManagedCluster(
             $"kubernetes-{location}-{configuration.Environment}-",
             new ManagedClusterArgs()
@@ -73,6 +79,15 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                     DnsServiceIP = "10.1.0.10",
                     ServiceCidr = "10.1.0.0/16",
                     DockerBridgeCidr = "172.17.0.1/16",
+                    LoadBalancerProfile = new ManagedClusterLoadBalancerProfileArgs()
+                    {
+                        AllocatedOutboundPorts = configuration.Kubernetes.LoadBalancer.PortsPerNode,
+                        IdleTimeoutInMinutes = configuration.Kubernetes.LoadBalancer.IdleTimeoutInMinutes,
+                        ManagedOutboundIPs = new ManagedClusterLoadBalancerProfileManagedOutboundIPsArgs()
+                        {
+                            Count = outboundIPCount,
+                        },
+                    },
                     LoadBalancerSku = LoadBalancerSku.Standard,
                 },
                 ServicePrincipalProfile = new ManagedClusterServicePrincipalProfileArgs

@@ -25,6 +25,9 @@ config:
         HourSlots: [1, 2]
     SKUTier: "Free"
     UpgradeChannel: "Stable"
+    LoadBalancer:
+      IdleTimeoutInMinutes: 4
+      PortsPerNode: 1024
     NodePools:
       - Type: System
         AvailabilityZones: [1]

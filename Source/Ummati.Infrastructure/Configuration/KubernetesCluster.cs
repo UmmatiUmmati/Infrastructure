@@ -21,6 +21,11 @@ public class KubernetesCluster
     public KubernetesClusterUpgradeChannel UpgradeChannel { get; set; } = default!;
 
     /// <summary>
+    /// Gets or sets the cluster load balancer options.
+    /// </summary>
+    public KubernetesClusterLoadBalancer LoadBalancer { get; set; } = default!;
+
+    /// <summary>
     /// Gets or sets the system node pool under which all Kubernetes Kubelet pods are run and no user workloads are run.
     /// </summary>
     public IEnumerable<KubernetesClusterNodePool> NodePools { get; set; } = default!;

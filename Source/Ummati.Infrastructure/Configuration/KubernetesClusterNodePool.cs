@@ -1,6 +1,7 @@
 namespace Ummati.Infrastructure.Configuration;
 
 using System.Collections.Generic;
+using System.Globalization;
 using Pulumi.AzureNative.ContainerService.V20220101;
 using Ummati.Infrastructure.Configuration.Finished;
 
@@ -62,6 +63,28 @@ public class KubernetesClusterNodePool
     /// Gets or sets the virtual machine size. DS3_v2 is the minimum recommended and DS4_v2 is recommended in production.
     /// </summary>
     public string VmSize { get; set; } = default!;
+
+    /// <summary>
+    /// Gets the maximum number of nodes possible during an upgrade.
+    /// </summary>
+    internal int MaximumNodeCountPossible
+    {
+        get
+        {
+            int maximumSurge;
+            if (this.MaximumSurge.EndsWith('%'))
+            {
+                var maximumSurgePercentage = int.Parse(this.MaximumSurge.TrimEnd('%'), CultureInfo.InvariantCulture);
+                maximumSurge = maximumSurgePercentage / 100 * this.MaximumNodeCount;
+            }
+            else
+            {
+                maximumSurge = int.Parse(this.MaximumSurge, CultureInfo.InvariantCulture);
+            }
+
+            return this.MaximumNodeCount + maximumSurge;
+        }
+    }
 
     internal AgentPoolMode InternalMode =>
         this.Type switch
