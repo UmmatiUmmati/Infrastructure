@@ -85,21 +85,6 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                     Name = ManagedClusterSKUName.Basic,
                     Tier = configuration.Kubernetes.InternalSKUTier,
                 },
-
-                // AddonProfiles = new InputMap<ManagedClusterAddonProfileArgs>()
-                // {
-                //     {
-                //         "omsAgent",
-                //         new ManagedClusterAddonProfileArgs()
-                //         {
-                //             Enabled = true,
-                //             Config = new InputMap<string>()
-                //             {
-                //                 { "logAnalyticsWorkspaceId", commonResource.WorkspaceId },
-                //             },
-                //         },
-                //     },
-                // },
             });
 
         var maintenanceConfiguration = new MaintenanceConfiguration(
