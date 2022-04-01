@@ -73,6 +73,7 @@ Task("UpdateServicePrincipal")
         var subscriptionId = GetSubscriptionId();
         DeleteServicePrincipal(servicePrincipalName);
         var (objectId, clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName, subscriptionId);
+        AddAzureActiveDirectoryPermissions(objectId);
 
         Information($"ObjectId: {objectId}");
         Information($"ClientId: {clientId}");
@@ -178,6 +179,7 @@ void DeleteServicePrincipal(string name)
                 .Append("create-for-rbac")
                 .AppendSwitchQuoted("--name", name)
                 .AppendSwitchQuoted("--role", "Contributor"))
+                //.AppendSwitchQuoted("--scopes", $"/subscriptions/{subscriptionId}"))
             .SetRedirectStandardOutput(true),
             out var lines);
 
@@ -190,6 +192,35 @@ void DeleteServicePrincipal(string name)
     var objectId = servicePrincipal.GetProperty("appId").GetString();
 
     return (objectId, clientId, clientSecret, tenantId);
+}
+
+void AddAzureActiveDirectoryPermissions(string objectId)
+{
+    var azureActiveDirectoryGraphApi = "00000002-0000-0000-c000-000000000000";
+    StartProcess(
+        "powershell",
+        new ProcessSettings()
+            .WithArguments(x => x
+                .Append("az")
+                .Append("ad")
+                .Append("app")
+                .Append("permission")
+                .Append("add")
+                .AppendSwitchQuoted("--id", objectId)
+                .AppendSwitchQuoted("--api", azureActiveDirectoryGraphApi)
+                .AppendSwitchQuoted("--api-permissions", "1cda74f2-2616-4834-b122-5cb1b07f8a59=Role"))); // Application.ReadWrite.All
+                // .AppendSwitchQuoted("--api-permissions", "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7=Role"))); // Application.ReadWrite.OwnedBy
+    StartProcess(
+        "powershell",
+        new ProcessSettings()
+            .WithArguments(x => x
+                .Append("az")
+                .Append("ad")
+                .Append("app")
+                .Append("permission")
+                .Append("grant")
+                .AppendSwitchQuoted("--id", objectId)
+                .AppendSwitchQuoted("--api", azureActiveDirectoryGraphApi)));
 }
 
 void SetPulumiConfig(string key, string value, bool secret = false)
