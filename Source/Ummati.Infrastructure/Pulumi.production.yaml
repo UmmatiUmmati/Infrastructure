@@ -19,44 +19,42 @@ config:
   ummati:CommonLocation: northeurope
   ummati:Locations:
     - northeurope
-
-  ummati:KubernetesMaintenanceDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-  ummati:KubernetesMaintenanceHourSlots: ["1", "2"]
-  ummati:KubernetesSKUTier: "Paid"
-  ummati:KubernetesUpgradeChannel: "Stable"
-
-  ummati:KubernetesSystemNodesAvailabilityZones: ["1", "2", "3"]
-  ummati:KubernetesSystemNodesMaximumPods: "30"
-  ummati:KubernetesSystemNodesMaximumNodeCount: "5"
-  ummati:KubernetesSystemNodesMaximumSurge: "33%"
-  ummati:KubernetesSystemNodesMinimumNodeCount: "3"
-  ummati:KubernetesSystemNodesOsDiskSizeGB: "100"
-  ummati:KubernetesSystemNodesOSDiskType: "Ephemeral"
-  ummati:KubernetesSystemNodesScaleSetEvictionPolicy: "Deallocate"
-  ummati:KubernetesSystemNodesVmSize: "Standard_D2ads_v5"
-
-  ummati:KubernetesUserNodesAvailabilityZones: ["1", "2", "3"]
-  ummati:KubernetesUserNodesMaximumPods: "250"
-  ummati:KubernetesUserNodesMaximumNodeCount: "3"
-  ummati:KubernetesUserNodesMaximumSurge: "33%"
-  ummati:KubernetesUserNodesMinimumNodeCount: "0"
-  ummati:KubernetesUserNodesOsDiskSizeGB: "100"
-  ummati:KubernetesUserNodesOSDiskType: "Ephemeral"
-  ummati:KubernetesUserNodesScaleSetEvictionPolicy: "Deallocate"
-  ummati:KubernetesUserNodesVmSize: "Standard_D2ads_v5"
-
-  # ummati:KubernetesSpotNodesMaximumPods: "250"
-  # ummati:KubernetesSpotNodesMaximumNodeCount: "3"
-  # ummati:KubernetesSpotNodesMaximumSurge: "33%"
-  # ummati:KubernetesSpotNodesMinimumNodeCount: "0"
-  # ummati:KubernetesSpotNodesOsDiskSizeGB: "100"
-  # ummati:KubernetesSpotNodesOSDiskType: "Ephemeral"
-  # ummati:KubernetesSpotNodesScaleSetEvictionPolicy: "Deallocate"
-  # ummati:KubernetesSpotNodesVmSize: "Standard_D2ads_v5"
-
-  ummati:ContainerConcurrentRequests: "50"
-  ummati:ContainerCpu: "0.25"
-  ummati:ContainerImageName: muhammadrehansaeed/api:0.0.0-preview.0
-  ummati:ContainerMaxReplicas: "10"
-  ummati:ContainerMemory: 0.5Gi
-  ummati:ContainerMinReplicas: "1"
+  ummati:Kubernetes:
+    Maintenance:
+      - Days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        HourSlots: [1, 2]
+    SKUTier: "Paid"
+    UpgradeChannel: "Stable"
+    LoadBalancer:
+      IdleTimeoutInMinutes: 4
+      PortsPerNode: 1024
+    NodePools:
+      - Type: System
+        AvailabilityZones: [1, 2, 3]
+        MaximumPods: 30
+        MaximumNodeCount: 5
+        MaximumSurge: "33%"
+        MinimumNodeCount: 3
+        OsDiskSizeGB: 100
+        OSDiskType: "Ephemeral"
+        ScaleSetEvictionPolicy: "Deallocate"
+        VmSize: "Standard_D2ads_v5"
+      - Type: User
+        AvailabilityZones: [1, 2, 3]
+        MaximumPods: 250
+        MaximumNodeCount: 3
+        MaximumSurge: "33%"
+        MinimumNodeCount: 0
+        OsDiskSizeGB: 100
+        OSDiskType: "Ephemeral"
+        ScaleSetEvictionPolicy: "Deallocate"
+        VmSize: "Standard_D2ads_v5"
+      - Type: Spot
+        MaximumPods: 250
+        MaximumNodeCount: 3
+        MaximumSurge: "33%"
+        MinimumNodeCount: 0
+        OsDiskSizeGB: 100
+        OSDiskType: "Ephemeral"
+        ScaleSetEvictionPolicy: "Deallocate"
+        VmSize: "Standard_D2ads_v5"
