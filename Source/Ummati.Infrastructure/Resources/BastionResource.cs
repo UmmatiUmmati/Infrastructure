@@ -24,19 +24,19 @@ public class BastionResource : ComponentResource<BastionResource>
         //     {
         //         IpConfigurations = new List<NetworkInterfaceIPConfigurationArgs>()
         //         {
-        //             new NetworkInterfaceIPConfigurationArgs()
-        //             {
-        //                 Subnet = new SubnetArgs()
-        //                 {
-        //                     Id = virtualNetworkResource.SubnetId,
-        //                 },
-        //             },
+        //              new NetworkInterfaceIPConfigurationArgs()
+        //              {
+        //                  Subnet = new SubnetArgs()
+        //                  {
+        //                      Id = virtualNetworkResource.SubnetId,
+        //                  },
+        //              },
         //         },
         //         Location = location,
         //         ResourceGroupName = resourceGroup.Name,
         //         Tags = configuration.GetTags(location),
         //     });
-
+        // 
         // var virtualMachine = new VirtualMachine(
         //     $"{name}-{configuration.ApplicationName}-virtualmachine-{location}-{configuration.Environment}",
         //     new VirtualMachineArgs()
