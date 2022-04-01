@@ -1,18 +1,18 @@
 config:
-  #azure-native:clientId:
-  #  secure: AAABAG5+K/c9MmB6qYZrJPW8A8VKhfAHAuxd/RZKdUoRlLU/He/w9PApMaCmtY4NL11LtVPfFWDaSqN4LyfI21cEMkU=
-  #azure-native:clientSecret:
-  #  secure: AAABAL3jl6O10LDySN3t6xFG1FcmD87oqUqv7VjyGloEEZ6qYNWgwWAH+EMTBR+cwsWzYQa+ZFdf9OPLr4084tFr
-  #azure-native:subscriptionId:
-  #  secure: AAABAMgu/gTBrmjkZIsnOUEp+xh+RSD9Ija2KVasEXCDXZJcvM5H0kIcwp2ipRoz5hlsDht7WqXFcdiugBondcolM3U=
-  #azure-native:tenantId:
-  #  secure: AAABACxtNLvqDxw5yKfMJWPLZm5xbx/yhn/3/iq9qX29wHB9Sh/u4NBzcWCAcfYBuEyEKQvhdvAvi5jd/R4cLQHy47E=
-  #azuread:clientId:
-  #  secure: AAABAKbgqe7N63NzAWaObKvUoc6K31b+HXmaSkrd+LqSvnwahSnKGBdDR69JulFVGuPtNYbADwcNrqZ0zYuLWTdFxcY=
-  #azuread:clientSecret:
-  #  secure: AAABAOJnAaNID0mDum8n4t6G7U77nOPlelO0gD+d7jo7BVg6JdV8cQvW3DHUwpocr+VOhdrxs+eMxvKJLJyRfOGG
-  #azuread:tenantId:
-  #  secure: AAABAEu1fpGZ+a7PaAIpLndkQ1gC77KeTn8IzMY1SBuFroLemf64QnTThuf96fNJxls8+9nhZoL2dRViY5NUD1RHw7I=
+  azure-native:clientId:
+    secure: AAABABVlTzMurpDLNTZRlBgBZ8VPMmVQ1sTXfKve1TBtSLN24SruOADbhOoocdW1rR3n2aN0uuZ0qDvnyI5aBP29zZc=
+  azure-native:clientSecret:
+    secure: AAABABFdimH/TDy3e2zt8aQVRuQuuG3O55gCKJ1zIAJ8pVqqaezrb7NcDmeLz7sdz/VjqfQliYG4bzx/dblhLQlU
+  azure-native:subscriptionId:
+    secure: AAABALQUOW5N18H6GRkQ7bvU/ckLZ6bsGM9hsLWxBTF1js/H3K7cFowKTxC9jgtxHCNrtk/gqF9prQ+UEhoz+9hO2MHrIA==
+  azure-native:tenantId:
+    secure: AAABAIE//1GaTnd8LQHUQlHs4Qy1l6R0vKQo3zYqbHJvDt2Tl6RHEFLCJCld76ws7/WVjJCm75Lbz5ys4A9U6pQH7Qw=
+  azuread:clientId:
+    secure: AAABAOsDQbnES2xCS663Rua+LEroL6rQ58NAVGEqv8IU4p6Lmw7E5y9IoEk1XlMNluZrmWR1XlE0HtrmSpJKoQpXhe0=
+  azuread:clientSecret:
+    secure: AAABALmh59frH0pDnIMI3pNUag/nYVRP4g/cx4OsVuhC/k8EzL6bx+3SjQBoXSaWAKeWnKlsfg7/yvszIdGIKUUQ
+  azuread:tenantId:
+    secure: AAABAO7kC3icKixSlH4MfDMlg+B0URQlzXkzIS/HHoLVImaAhSefU9DMiwsarHxpCScVl1IRPFqGuiA+imhO0DeBJCU=
 
   ummati:ApplicationName: ummati
   ummati:Environment: development

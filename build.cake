@@ -1,4 +1,7 @@
+#addin nuget:?package=SimpleExec&version=10.0.0
+
 using System.Text.Json;
+using SimpleExec;
 
 var target = Argument("Target", "Default");
 var configuration =
@@ -68,46 +71,35 @@ Task("Test")
 
 Task("UpdateServicePrincipal")
     .Description("")
-    .Does(() =>
+    .Does(async () =>
     {
-        var subscriptionId = GetSubscriptionId();
-        DeleteServicePrincipal(servicePrincipalName);
-        var (objectId, clientId, clientSecret, tenantId) = CreateServicePrincipal(servicePrincipalName, subscriptionId);
-        AddAzureActiveDirectoryPermissions(objectId);
+        var subscriptionId = await GetSubscriptionIdAsync();
+        await DeleteServicePrincipalAsync(servicePrincipalName);
+        var servicePrincipal = await CreateServicePrincipalAsync(servicePrincipalName, subscriptionId);
+        await AddAzureActiveDirectoryPermissionsAsync(servicePrincipal.ObjectId);
 
-        Information($"ObjectId: {objectId}");
-        Information($"ClientId: {clientId}");
-        Information($"ClientSecret: {clientSecret}");
-        Information($"TenantId: {tenantId}");
+        Information($"ObjectId: {servicePrincipal.ObjectId}");
+        Information($"ClientId: {servicePrincipal.ClientId}");
+        Information($"ClientSecret: {servicePrincipal.ClientSecret}");
+        Information($"TenantId: {servicePrincipal.TenantId}");
         Information($"SubscriptionId: {subscriptionId}");
 
-        SetPulumiConfig("azuread:clientId", clientId, secret: true);
-        SetPulumiConfig("azuread:clientSecret", clientSecret, secret: true);
-        SetPulumiConfig("azuread:tenantId", tenantId, secret: true);
-
-        SetPulumiConfig("azure-native:clientId", clientId, secret: true);
-        SetPulumiConfig("azure-native:clientSecret", clientSecret, secret: true);
-        SetPulumiConfig("azure-native:tenantId", tenantId, secret: true);
-        SetPulumiConfig("azure-native:subscriptionId", subscriptionId, secret: true);
+        await SetPulumiConfigAsync("azuread:clientId", servicePrincipal.ClientId, secret: true);
+        await SetPulumiConfigAsync("azuread:clientSecret", servicePrincipal.ClientSecret, secret: true);
+        await SetPulumiConfigAsync("azuread:tenantId", servicePrincipal.TenantId, secret: true);
+           
+        await SetPulumiConfigAsync("azure-native:clientId", servicePrincipal.ClientId, secret: true);
+        await SetPulumiConfigAsync("azure-native:clientSecret", servicePrincipal.ClientSecret, secret: true);
+        await SetPulumiConfigAsync("azure-native:tenantId", servicePrincipal.TenantId, secret: true);
+        await SetPulumiConfigAsync("azure-native:subscriptionId", subscriptionId, secret: true);
     });
 
 Task("UpdateAzureLocations")
     .Description("")
-    .Does(() =>
+    .Does(async () =>
     {
-        StartProcess(
-            "powershell",
-            new ProcessSettings()
-                .WithArguments(x => x
-                    .Append("az")
-                    .Append("account")
-                    .Append("list-locations"))
-                .SetRedirectStandardOutput(true),
-                out var lines);
-        foreach (var file in GetFiles("**/AzureLocations.json"))
-        {
-            System.IO.File.WriteAllLines(file.ToString(), lines);
-        }
+        var json = await ReadAsync("az", "account list-locations");
+        System.IO.File.WriteAllText(GetFiles("**/AzureLocations.json").First().ToString(), json);
     });
 
 Task("Default")
@@ -117,129 +109,86 @@ Task("Default")
 
 RunTarget(target);
 
-string GetSubscriptionId()
-{
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("account")
-                .Append("show")
-                .AppendSwitch("--query", "id")
-                .AppendSwitch("--output", "tsv"))
-            .SetRedirectStandardOutput(true),
-            out var lines);
-    return lines.First();
-}
+Task<string> GetSubscriptionIdAsync() => ReadAsync("az", "account show --query id --output tsv");
 
-JsonElement.ArrayEnumerator GetServicePrincipals(string name)
+async Task<JsonElement.ArrayEnumerator> GetServicePrincipalsAsync(string name)
 {
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("ad")
-                .Append("sp")
-                .Append("list")
-                .AppendSwitchQuoted("--display-name", name))
-            .SetRedirectStandardOutput(true),
-            out var lines);
-    var document = JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
+    var json = await ReadAsync("az", $"ad sp list --display-name \"{name}\"");
+    var document = JsonDocument.Parse(json).RootElement;
     return document.EnumerateArray();
 }
 
-void DeleteServicePrincipal(string name)
+async Task DeleteServicePrincipalAsync(string name)
 {
-    foreach (var item in GetServicePrincipals(name))
+    foreach (var item in await GetServicePrincipalsAsync(name))
     {
         var clientId = item.GetProperty("appId").GetString();
-        StartProcess(
-            "powershell",
-            new ProcessSettings()
-                .WithArguments(x => x
-                    .Append("az")
-                    .Append("ad")
-                    .Append("sp")
-                    .Append("delete")
-                    .AppendSwitchQuoted("--id", clientId)));
+        await ReadAsync("az", $"ad sp delete --id \"{clientId}\"");
     }
 }
 
-(string objectId, string clientId, string clientSecret, string tenantId) CreateServicePrincipal(string name, string subscriptionId)
+async Task<ServicePrincipal> CreateServicePrincipalAsync(string name, string subscriptionId)
 {
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("ad")
-                .Append("sp")
-                .Append("create-for-rbac")
-                .AppendSwitchQuoted("--name", name)
-                .AppendSwitchQuoted("--role", "Contributor"))
-                //.AppendSwitchQuoted("--scopes", $"/subscriptions/{subscriptionId}"))
-            .SetRedirectStandardOutput(true),
-            out var lines);
-
-    var document = JsonDocument.Parse(string.Join(string.Empty, lines)).RootElement;
+    var json = await ReadAsync("az", $"ad sp create-for-rbac --name \"{name}\" --role Contributor");
+    var document = JsonDocument.Parse(json).RootElement;
     var clientId = document.GetProperty("appId").GetString();
     var clientSecret = document.GetProperty("password").GetString();
     var tenantId = document.GetProperty("tenant").GetString();
 
-    var servicePrincipal = GetServicePrincipals(name).First();
+    var servicePrincipal = (await GetServicePrincipalsAsync(name)).First();
     var objectId = servicePrincipal.GetProperty("appId").GetString();
 
-    return (objectId, clientId, clientSecret, tenantId);
+    return new ServicePrincipal(objectId, clientId, clientSecret, tenantId);
 }
 
-void AddAzureActiveDirectoryPermissions(string objectId)
+async Task AddAzureActiveDirectoryPermissionsAsync(string objectId)
 {
     var azureActiveDirectoryGraphApi = "00000002-0000-0000-c000-000000000000";
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("ad")
-                .Append("app")
-                .Append("permission")
-                .Append("add")
-                .AppendSwitchQuoted("--id", objectId)
-                .AppendSwitchQuoted("--api", azureActiveDirectoryGraphApi)
-                .AppendSwitchQuoted("--api-permissions", "1cda74f2-2616-4834-b122-5cb1b07f8a59=Role"))); // Application.ReadWrite.All
-                // .AppendSwitchQuoted("--api-permissions", "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7=Role"))); // Application.ReadWrite.OwnedBy
-    StartProcess(
-        "powershell",
-        new ProcessSettings()
-            .WithArguments(x => x
-                .Append("az")
-                .Append("ad")
-                .Append("app")
-                .Append("permission")
-                .Append("grant")
-                .AppendSwitchQuoted("--id", objectId)
-                .AppendSwitchQuoted("--api", azureActiveDirectoryGraphApi)));
+    var permission = "1cda74f2-2616-4834-b122-5cb1b07f8a59=Role"; // Application.ReadWrite.All
+    // var permission = "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7=Role"; // Application.ReadWrite.OwnedBy
+    await ReadAsync("az", $"ad app permission add --id \"{objectId}\" --api \"{azureActiveDirectoryGraphApi}\" --api-permissions \"{permission}\"");
+    // await ReadAsync("az", $"ad app permission grant --id \"{objectId}\" --api \"{azureActiveDirectoryGraphApi}\"");
+    await RetryReadAsync("az", $"ad app permission admin-consent --id \"{objectId}\"");
 }
 
-void SetPulumiConfig(string key, string value, bool secret = false)
+async Task SetPulumiConfigAsync(string key, string value, bool secret = false)
 {
-    StartProcess(
+    var workingDirectory = GetFiles("**/Pulumi.yaml").Single().GetDirectory().ToString();
+    var secretSwitch = secret ? " --secret" : "";
+    await ReadAsync(
         "pulumi",
-        new ProcessSettings()
-            .UseWorkingDirectory(GetFiles("**/Pulumi.yaml").Single().GetDirectory())
-            .WithArguments(builder =>
-            {
-                builder
-                    .Append("config")
-                    .Append("set")
-                    .Append(key)
-                    .AppendQuoted(value)
-                    .AppendSwitchQuoted("--stack", stack);
-                if (secret)
-                {
-                    builder.Append("--secret");
-                }
-            }));
+        $"config set \"{key}\" \"{value}\" --stack \"{stack}\"{secretSwitch}",
+        workingDirectory);
 }
+
+async Task<string> ReadAsync(string name, string arguments, string workingDirectory = null)
+{
+    Console.ForegroundColor = ConsoleColor.Blue;
+    Information($"{name} {arguments}");
+    Console.ForegroundColor = ConsoleColor.Gray;
+    var (standardOutput, _) = await Command.ReadAsync(name, arguments, workingDirectory);
+    if (!string.IsNullOrEmpty(standardOutput))
+    {
+        Information(standardOutput);
+    }
+    return standardOutput;
+}
+
+async Task<string> RetryReadAsync(string name, string arguments, string workingDirectory = null)
+{
+    while (true)
+    {
+        try
+        {
+            return await ReadAsync(name, arguments, workingDirectory);
+            break;
+        }
+        catch (ExitCodeReadException exitCodeReadException)
+        {
+            Error(exitCodeReadException.StandardError);
+            await System.Threading.Tasks.Task.Delay(1000);
+        }
+    }
+}
+
+public record class ServicePrincipal(string ObjectId, string ClientId, string ClientSecret, string TenantId);
