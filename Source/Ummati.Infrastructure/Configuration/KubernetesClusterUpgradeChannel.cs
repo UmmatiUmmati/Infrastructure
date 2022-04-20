@@ -1,4 +1,4 @@
-﻿namespace Ummati.Infrastructure.Configuration.Finished;
+namespace Ummati.Infrastructure.Configuration;
 
 public enum KubernetesClusterUpgradeChannel
 {

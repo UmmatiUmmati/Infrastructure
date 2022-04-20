@@ -1,7 +1,6 @@
 namespace Ummati.Infrastructure.Configuration;
 
 using Pulumi.AzureNative.ContainerService.V20220101;
-using Ummati.Infrastructure.Configuration.Finished;
 
 public class KubernetesCluster
 {

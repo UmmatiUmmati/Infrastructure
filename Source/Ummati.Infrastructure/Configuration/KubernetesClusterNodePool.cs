@@ -3,7 +3,6 @@ namespace Ummati.Infrastructure.Configuration;
 using System.Collections.Generic;
 using System.Globalization;
 using Pulumi.AzureNative.ContainerService.V20220101;
-using Ummati.Infrastructure.Configuration.Finished;
 
 public class KubernetesClusterNodePool
 {

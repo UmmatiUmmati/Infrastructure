@@ -36,7 +36,7 @@ public class BastionResource : ComponentResource<BastionResource>
         //         ResourceGroupName = resourceGroup.Name,
         //         Tags = configuration.GetTags(location),
         //     });
-        // 
+        //
         // var virtualMachine = new VirtualMachine(
         //     $"{name}-{configuration.ApplicationName}-virtualmachine-{location}-{configuration.Environment}",
         //     new VirtualMachineArgs()
