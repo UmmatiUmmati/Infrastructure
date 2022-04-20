@@ -87,7 +87,7 @@ Task("UpdateServicePrincipal")
         await SetPulumiConfigAsync("azuread:clientId", servicePrincipal.ClientId, secret: true);
         await SetPulumiConfigAsync("azuread:clientSecret", servicePrincipal.ClientSecret, secret: true);
         await SetPulumiConfigAsync("azuread:tenantId", servicePrincipal.TenantId, secret: true);
-           
+
         await SetPulumiConfigAsync("azure-native:clientId", servicePrincipal.ClientId, secret: true);
         await SetPulumiConfigAsync("azure-native:clientSecret", servicePrincipal.ClientSecret, secret: true);
         await SetPulumiConfigAsync("azure-native:tenantId", servicePrincipal.TenantId, secret: true);
@@ -181,7 +181,6 @@ async Task<string> RetryReadAsync(string name, string arguments, string workingD
         try
         {
             return await ReadAsync(name, arguments, workingDirectory);
-            break;
         }
         catch (ExitCodeReadException exitCodeReadException)
         {
