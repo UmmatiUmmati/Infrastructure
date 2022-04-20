@@ -1,7 +1,5 @@
 name: Deploy
 
-concurrency: ${{matrix.environment}}
-
 on:
   push:
     branches:
@@ -20,6 +18,7 @@ jobs:
   deploy:
     name: Deploy-${{matrix.environment}}
     runs-on: ubuntu-latest
+    concurrency: ${{matrix.environment}}
     strategy:
       matrix:
         environment:
