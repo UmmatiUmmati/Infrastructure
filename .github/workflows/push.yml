@@ -48,6 +48,26 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - name: "Publish Artefacts"
         uses: actions/upload-artifact@v3.0.0
+        if: always()
         with:
           name: Artefacts
           path: "./Artefacts"
+
+  publish-test-results:
+    name: "Publish Tests Results"
+    needs: build
+    if: always()
+    permissions:
+      checks: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Download Artefact"
+        uses: actions/download-artifact@v3.0.0
+        with:
+          path: "./Artefacts"
+      - name: "Publish Test Summary"
+        uses: test-summary/action@v1
+        with:
+          paths: "./Artefacts/*/*.xml"
+

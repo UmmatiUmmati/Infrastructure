@@ -61,6 +61,7 @@ Task("Test")
                 Loggers = new string[]
                 {
                     $"trx;LogFileName={project.GetFilenameWithoutExtension()}.trx",
+                    $"junit;LogFileName={project.GetFilenameWithoutExtension()}.xml",
                     $"html;LogFileName={project.GetFilenameWithoutExtension()}.html",
                 },
                 NoBuild = true,
@@ -87,7 +88,7 @@ Task("UpdateServicePrincipal")
         await SetPulumiConfigAsync("azuread:clientId", servicePrincipal.ClientId, secret: true);
         await SetPulumiConfigAsync("azuread:clientSecret", servicePrincipal.ClientSecret, secret: true);
         await SetPulumiConfigAsync("azuread:tenantId", servicePrincipal.TenantId, secret: true);
-           
+
         await SetPulumiConfigAsync("azure-native:clientId", servicePrincipal.ClientId, secret: true);
         await SetPulumiConfigAsync("azure-native:clientSecret", servicePrincipal.ClientSecret, secret: true);
         await SetPulumiConfigAsync("azure-native:tenantId", servicePrincipal.TenantId, secret: true);
