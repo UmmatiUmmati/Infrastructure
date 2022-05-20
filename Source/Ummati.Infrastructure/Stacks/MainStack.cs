@@ -40,13 +40,20 @@ public class MainStack : Stack
             "bastion",
             Configuration,
             Configuration.CommonLocation,
-            bastionResourceGroup);
+            bastionResourceGroup,
+            subnetCount: 2);
+        var bastionVirtualMachineResource = new VirtualMachineResource(
+            "bastion",
+            Configuration,
+            Configuration.CommonLocation,
+            bastionResourceGroup,
+            bastionVirtualNetworkResource.SubnetIds.GetAt(0));
         var bastionResource = new BastionResource(
             $"common",
             Configuration,
             Configuration.CommonLocation,
             bastionResourceGroup,
-            bastionVirtualNetworkResource);
+            bastionVirtualNetworkResource.SubnetIds.GetAt(1));
 
         var kubernetesResources = new List<KubernetesResource>();
         foreach (var location in Configuration.Locations)
@@ -61,7 +68,8 @@ public class MainStack : Stack
                 "kubernetes",
                 Configuration,
                 location,
-                resourceGroup);
+                resourceGroup,
+                subnetCount: 1);
             var kubernetesResource = new KubernetesResource(
                 $"kubernetes",
                 Configuration,
@@ -69,7 +77,7 @@ public class MainStack : Stack
                 resourceGroup,
                 monitorResource,
                 identityResource,
-                kubernetesVirtualNetworkResource);
+                kubernetesVirtualNetworkResource.SubnetIds.GetAt(0));
             kubernetesResources.Add(kubernetesResource);
         }
 

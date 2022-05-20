@@ -1,5 +1,6 @@
 namespace Ummati.Infrastructure.Resources;
 
+using System.Collections.Immutable;
 using Pulumi;
 using Pulumi.AzureNative.Network;
 using Pulumi.AzureNative.Network.Inputs;
@@ -13,6 +14,7 @@ public class VirtualNetworkResource : ComponentResource<VirtualNetworkResource>
         IConfiguration configuration,
         string location,
         ResourceGroup resourceGroup,
+        int subnetCount,
         ComponentResourceOptions? options = null)
         : base(name, configuration, location, options)
     {
@@ -34,19 +36,24 @@ public class VirtualNetworkResource : ComponentResource<VirtualNetworkResource>
                 Tags = configuration.GetTags(location),
             });
 
-        var subnet = new Subnet(
-            $"{name}-subnet-{location}-{configuration.Environment}",
-            new Pulumi.AzureNative.Network.SubnetArgs()
-            {
-                AddressPrefix = $"10.0.0.0/16",
-                ResourceGroupName = resourceGroup.Name,
-                VirtualNetworkName = virtualNetwork.Name,
-            });
+        var subnetIds = new List<Output<string>>();
+        for (var i = 0; i < subnetCount; i++)
+        {
+            var subnet = new Subnet(
+                $"{name}-subnet-{location}-{configuration.Environment}",
+                new Pulumi.AzureNative.Network.SubnetArgs()
+                {
+                    AddressPrefix = $"10.0.0.0/16",
+                    ResourceGroupName = resourceGroup.Name,
+                    VirtualNetworkName = virtualNetwork.Name,
+                });
+            subnetIds.Add(subnet.Id);
+        }
 
-        this.SubnetId = subnet.Id;
+        this.SubnetIds = Output.All(subnetIds);
 
         this.RegisterOutputs();
     }
 
-    public Output<string> SubnetId { get; set; }
+    public Output<ImmutableArray<string>> SubnetIds { get; set; }
 }

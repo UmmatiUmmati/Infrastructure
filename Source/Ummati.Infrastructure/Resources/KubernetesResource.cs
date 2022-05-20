@@ -20,14 +20,14 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
         ResourceGroup resourceGroup,
         MonitorResource monitorResource,
         IdentityResource identityResource,
-        VirtualNetworkResource virtualNetworkResource,
+        Output<string> subnetId,
         ComponentResourceOptions? options = null)
          : base(name, configuration, location, options)
     {
         ArgumentNullException.ThrowIfNull(resourceGroup);
         ArgumentNullException.ThrowIfNull(monitorResource);
         ArgumentNullException.ThrowIfNull(identityResource);
-        ArgumentNullException.ThrowIfNull(virtualNetworkResource);
+        ArgumentNullException.ThrowIfNull(subnetId);
 
         var nodePoolProfiles = new List<ManagedClusterAgentPoolProfileArgs>();
         foreach (var nodePoolGroup in configuration.Kubernetes.NodePools.GroupBy(x => x.Type))
@@ -42,7 +42,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                         resourceGroup,
                         configuration,
                         nodePool,
-                        virtualNetworkResource));
+                        subnetId));
                 ++index;
             }
         }
@@ -177,7 +177,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
         ResourceGroup resourceGroup,
         IConfiguration configuration,
         KubernetesClusterNodePool kubernetesClusterNodePool,
-        VirtualNetworkResource virtualNetworkResource)
+        Output<string> subnetId)
     {
         if (kubernetesClusterNodePool.AvailabilityZones is not null &&
             kubernetesClusterNodePool.Type is KubernetesClusterNodePoolType.System or KubernetesClusterNodePoolType.User &&
@@ -203,7 +203,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                     location,
                     configuration,
                     kubernetesClusterNodePool,
-                    virtualNetworkResource,
+                    subnetId,
                     availabilityZone,
                     proximityPlacementGroup);
             }
@@ -217,7 +217,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                 location,
                 configuration,
                 kubernetesClusterNodePool,
-                virtualNetworkResource);
+                subnetId);
         }
     }
 
@@ -226,7 +226,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
         string location,
         IConfiguration configuration,
         KubernetesClusterNodePool kubernetesClusterNodePool,
-        VirtualNetworkResource virtualNetworkResource,
+        Output<string> subnetId,
         int? availabilityZone = null,
         ProximityPlacementGroup? proximityPlacementGroup = null)
     {
@@ -256,7 +256,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
                 MaxSurge = kubernetesClusterNodePool.MaximumSurge,
             },
             VmSize = kubernetesClusterNodePool.VmSize,
-            VnetSubnetID = virtualNetworkResource.SubnetId,
+            VnetSubnetID = subnetId,
         };
 
         if (availabilityZone is not null)
