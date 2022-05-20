@@ -182,7 +182,6 @@ async Task<string> RetryReadAsync(string name, string arguments, string workingD
         try
         {
             return await ReadAsync(name, arguments, workingDirectory);
-            break;
         }
         catch (ExitCodeReadException exitCodeReadException)
         {

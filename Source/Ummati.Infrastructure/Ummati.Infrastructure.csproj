@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
-    <PackageReference Include="FluentValidation" Version="10.4.0" />
-    <PackageReference Include="Pulumi.AzureAD" Version="5.18.0" />
-    <PackageReference Include="Pulumi.AzureNative" Version="1.61.0" />
-    <PackageReference Include="Pulumi.Kubernetes" Version="3.18.0" />
+    <PackageReference Include="FluentValidation" Version="11.0.1" />
+    <PackageReference Include="Pulumi.AzureAD" Version="5.22.0" />
+    <PackageReference Include="Pulumi.AzureNative" Version="1.64.1" />
+    <PackageReference Include="Pulumi.Kubernetes" Version="3.19.1" />
   </ItemGroup>
 
   <ItemGroup>
