@@ -38,9 +38,7 @@ public class ComponentResource<T> : ComponentResource
             throw new ArgumentException($"'{nameof(location)}' cannot be empty.", nameof(location));
         }
 
-#pragma warning disable CA1308 // Normalize strings to uppercase
         var type = typeof(T).Name.ToLowerInvariant().Replace("Resource", string.Empty, StringComparison.Ordinal);
-#pragma warning restore CA1308 // Normalize strings to uppercase
 
         return $"{name}-{type}-{location}-{configuration.Environment}-";
     }

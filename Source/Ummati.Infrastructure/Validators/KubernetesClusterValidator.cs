@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FluentValidation;
 using Ummati.Infrastructure.Configuration;
 
-internal class KubernetesClusterValidator : AbstractValidator<KubernetesCluster>
+internal sealed class KubernetesClusterValidator : AbstractValidator<KubernetesCluster>
 {
     private const string ContainAtLeastOneSystemNodePoolMessage =
         "'{PropertyName}' must contain at least one system node pool.";

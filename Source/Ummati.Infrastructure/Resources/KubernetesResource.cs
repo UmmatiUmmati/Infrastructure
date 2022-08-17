@@ -185,9 +185,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
         {
             foreach (var availabilityZone in kubernetesClusterNodePool.AvailabilityZones)
             {
-#pragma warning disable CA1308 // Normalize strings to uppercase
                 var name = $"{kubernetesClusterNodePool.Type.ToString().ToLowerInvariant()}{index}az{availabilityZone}";
-#pragma warning restore CA1308 // Normalize strings to uppercase
                 var proximityPlacementGroup = new ProximityPlacementGroup(
                     $"proximityplacementgroup-{name}-{location}-{configuration.Environment}-",
                     new ProximityPlacementGroupArgs()
@@ -211,9 +209,7 @@ public class KubernetesResource : ComponentResource<KubernetesResource>
         else
         {
             yield return GetManagedClusterAgentPoolProfileArgs(
-#pragma warning disable CA1308 // Normalize strings to uppercase
                 $"{kubernetesClusterNodePool.Type.ToString().ToLowerInvariant()}{index}",
-#pragma warning restore CA1308 // Normalize strings to uppercase
                 location,
                 configuration,
                 kubernetesClusterNodePool,

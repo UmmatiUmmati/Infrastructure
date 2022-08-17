@@ -18,9 +18,7 @@ public static class ConfigurationExtensions
         return string.Join(Environment.NewLine, configuration.GetAzureActiveDirecoryTags());
     }
 
-#pragma warning disable CA1002 // Do not expose generic lists
     public static List<string> GetAzureActiveDirecoryTags(this IConfiguration configuration)
-#pragma warning restore CA1002 // Do not expose generic lists
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
