@@ -42,5 +42,5 @@ public class ConfigurationValidator : AbstractValidator<IConfiguration>
 
     private static bool BeAnAzureLocation(string location) => Azure.Locations.Contains(location);
 
-    private static bool BeLowerCase(string value) => value.All(x => char.IsLower(x));
+    private static bool BeLowerCase(string value) => value.All(char.IsLower);
 }
