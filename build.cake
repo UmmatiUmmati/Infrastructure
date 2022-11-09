@@ -1,7 +1,6 @@
 #addin nuget:?package=SimpleExec&version=11.0.0
 
 using System.Text.Json;
-using SimpleExec;
 
 var target = Argument("Target", "Default");
 var configuration =
@@ -60,9 +59,9 @@ Task("Test")
                 Configuration = configuration,
                 Loggers = new string[]
                 {
-                    $"trx;LogFileName={project.GetFilenameWithoutExtension()}.trx",
-                    $"junit;LogFileName={project.GetFilenameWithoutExtension()}.xml",
-                    $"html;LogFileName={project.GetFilenameWithoutExtension()}.html",
+                    $"trx;LogFilePrefix={project.GetFilenameWithoutExtension()}",
+                    $"junit;LogFilePrefix={project.GetFilenameWithoutExtension()}",
+                    $"html;LogFilePrefix={project.GetFilenameWithoutExtension()}",
                 },
                 NoBuild = true,
                 NoRestore = true,
@@ -167,7 +166,7 @@ async Task<string> ReadAsync(string name, string arguments, string workingDirect
     Console.ForegroundColor = ConsoleColor.Blue;
     Information($"{name} {arguments}");
     Console.ForegroundColor = ConsoleColor.Gray;
-    var (standardOutput, _) = await Command.ReadAsync(name, arguments, workingDirectory);
+    var (standardOutput, _) = await SimpleExec.Command.ReadAsync(name, arguments, workingDirectory);
     if (!string.IsNullOrEmpty(standardOutput))
     {
         Information(standardOutput);
@@ -183,7 +182,7 @@ async Task<string> RetryReadAsync(string name, string arguments, string workingD
         {
             return await ReadAsync(name, arguments, workingDirectory);
         }
-        catch (ExitCodeReadException exitCodeReadException)
+        catch (SimpleExec.ExitCodeReadException exitCodeReadException)
         {
             Error(exitCodeReadException.StandardError);
             await System.Threading.Tasks.Task.Delay(1000);

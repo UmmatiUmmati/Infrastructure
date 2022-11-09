@@ -2,7 +2,7 @@
 
   <PropertyGroup Label="Build">
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
@@ -12,15 +12,12 @@
     <PackageReference Include="Pulumi.Kubernetes" Version="3.22.1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="Files">
     <Compile Update="Assets\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="Assets\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
