@@ -38,7 +38,7 @@ jobs:
         run: dotnet cake --target=Test
         shell: pwsh
       - name: "Pulumi Up"
-        uses: pulumi/actions@v3.20.0
+        uses: pulumi/actions@v3.21.0
         with:
           command: up
           stack-name: ${{matrix.environment}}
